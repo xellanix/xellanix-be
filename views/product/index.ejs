@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hehehe</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+<body style="background: lightgray">
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+
+                <% if (messages.success) { %>
+                    <div class="alert alert-success" role="alert"><%- messages.success %></div>
+                <% } %>
+                
+                <% if (messages.error) { %>
+                    <div class="alert alert-danger" role="alert"><%- messages.error %></div>
+                <% } %>
+
+                <div class="card border-0 shadow rounded">
+                    <div class="card-body">
+                        <a href="/product/create" class="btn btn-md btn-success mb-3">Create</a>
+                        <table class="table table-bordered">
+                            <thead>
+                              <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Access ID</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Learn Link</th>
+                                <th scope="col">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                <% if(products.length){
+                                    
+                                    for(var i = 0; i< products.length; i++) {%>  
+                                        <tr>
+                                            <th scope="row" class="text-center"><%= products[i].product_id %></th>
+                                            <td class="text-center"><%= products[i].access_type %></td>
+                                            <td><%= products[i].product_name%></td>
+                                            <td><%= products[i].description%></td>
+                                            <td><%= products[i].learn_link%></td>
+                                            <td class="text-center">
+                                                <a href="/product/edit/<%=products[i].product_id%>" class="btn btn-sm btn-primary">Update</a>
+                                                <a onclick="return alert('Are You sure?')" href="/product/delete/<%=products[i].product_id%>" class="btn btn-sm btn-danger">Delete</a>
+                                            </td>
+                                        </tr>
+                                    <% }
+                                    
+                                }else{ %>
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="alert alert-danger" role="alert">
+                                                Products Not Available!
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>    
+                            </tbody>
+                        </table>  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    </script>
+
+</body>
+</html>
