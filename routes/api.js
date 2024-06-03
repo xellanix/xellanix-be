@@ -4,7 +4,9 @@ var router = express.Router();
 //import database
 var connection = require("../library/db");
 var com = require("../library/com");
+const localhost = "http://localhost:3000/";
 
+// Create product
 router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, next) {
 	const { prod_name, prod_desc, prod_url } = req.body;
 
@@ -18,11 +20,24 @@ router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, n
 		learn_link: prod_url,
 	};
 
-	await com.talk("http://localhost:3000/api/product-c", "json", bodyData, (response) => {
-		response.json().then((data) => {
-			res.json(data);
-		});
-	});
+	const resp = await com.talk(localhost + "api/product-c", "json", bodyData);
+	resp && res.json(await resp.json());
+});
+
+// Read product
+router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, next) {
+	const resp = await com.listen(localhost + "api/product-r", "json");
+	resp && res.json(await resp.json());
+});
+
+// Create product
+// use this UUIDv4:
+// 23b9d3e8-ae4d-4420-b136-ea905f7844ed
+
+// Read member
+router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, next) {
+	const resp = await com.listen(localhost + "api/member-r", "json");
+	resp && res.json(await resp.json());
 });
 
 router.post("/product-c", function (req, res, next) {
@@ -104,6 +119,69 @@ router.post("/product-c", function (req, res, next) {
 		}
 	} catch (error) {
 		console.error("Error in /api/product-c route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
+router.get("/product-r", function (req, res, next) {
+	try {
+		connection.query(
+			"SELECT product_id, access_type, product_name, description, learn_link FROM product JOIN type_access ON product.access_id = type_access.access_id ORDER BY type_access.access_id, product_id, product_name",
+			function (err, rows) {
+				if (err) {
+					req.flash("error", err);
+					res.render("product", {
+						products: "",
+					});
+					throw new Error("Query error: " + err.message);
+				} else {
+					const items = rows.map((row) => {
+						return {
+							product_id: row.product_id,
+							access_type: row.access_type,
+							product_name: row.product_name,
+							description: row.description,
+							learn_link: row.learn_link,
+						};
+					});
+					res.json(items);
+				}
+			}
+		);
+	} catch (error) {
+		console.error("Error in /api/product-r route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
+router.get("/member-r", function (req, res, next) {
+	try {
+		connection.query(
+			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY member_id, member_role, member_name",
+			function (err, rows) {
+				if (err) {
+					req.flash("error", err);
+					res.render("member", {
+						members: "",
+					});
+					throw new Error("Query error: " + err.message);
+				} else {
+					const items = rows.map((row) => {
+						const member = {
+							member_id: row.member_id,
+							access_type: row.access_type,
+							member_name: row.member_name,
+							member_role: row.member_role,
+							member_photo: row.member_photo,
+						};
+						return member;
+					});
+					res.json(items);
+				}
+			}
+		);
+	} catch (error) {
+		console.error("Error in /api/member-r route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });

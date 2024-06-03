@@ -24,10 +24,10 @@
             <div class="card border-0 shadow rounded mb-3">
                 <div class="card-body">
                     <div class="btn-group" role="group">
-                        <input type="radio" class="btn-check" name="page-radio" id="product-page" autocomplete="off" checked>
+                        <input type="radio" class="btn-check" name="page-radio" id="product-page" autocomplete="off">
                         <label class="btn btn-outline-primary" for="product-page">Product</label>
                     
-                        <input type="radio" class="btn-check" name="page-radio" id="member-page" autocomplete="off">
+                        <input type="radio" class="btn-check" name="page-radio" id="member-page" autocomplete="off" checked>
                         <label class="btn btn-outline-primary" for="member-page">Member</label>
                     </div>
                 </div>
@@ -35,31 +35,31 @@
 
             <div class="card border-0 shadow rounded">
                 <div class="card-body">
-                    <a href="/product/create" class="btn btn-md btn-success mb-3">Create</a>
+                    <a href="/member/create" class="btn btn-md btn-success mb-3">Create</a>
                     <table class="table table-bordered">
                         <thead>
                           <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Access Type</th>
-                            <th scope="col">Product Name</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Learn Link</th>
+                            <th scope="col">Member Name</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Photo</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                            <% if(products.length){
+                            <% if(members.length){
                                 
-                                for(var i = 0; i< products.length; i++) {%>  
+                                for(var i = 0; i< members.length; i++) {%>  
                                     <tr>
-                                        <th scope="row" class="text-center"><%= products[i].product_id %></th>
-                                        <td class="text-center"><%= products[i].access_type %></td>
-                                        <td><%= products[i].product_name%></td>
-                                        <td><%= products[i].description%></td>
-                                        <td><%= products[i].learn_link%></td>
+                                        <th scope="row" class="text-center"><%= members[i].member_id %></th>
+                                        <td class="text-center"><%= members[i].access_type %></td>
+                                        <td><%= members[i].member_name%></td>
+                                        <td><%= members[i].member_role%></td>
+                                        <td><%= members[i].member_photo%></td>
                                         <td class="text-center">
-                                            <a href="/product/edit/<%=products[i].product_id%>" class="btn btn-sm btn-primary">Update</a>
-                                            <a onclick="return alert('Are You sure?')" href="/product/delete/<%=products[i].product_id%>" class="btn btn-sm btn-danger">Delete</a>
+                                            <a href="/product/edit/<%=members[i].member_id%>" class="btn btn-sm btn-primary">Update</a>
+                                            <a onclick="return alert('Are You sure?')" href="/product/delete/<%=members[i].member_id%>" class="btn btn-sm btn-danger">Delete</a>
                                         </td>
                                     </tr>
                                 <% }
@@ -68,7 +68,7 @@
                                 <tr>
                                     <td colspan="6">
                                         <div class="alert alert-danger" role="alert">
-                                            Products Not Available!
+                                            Members Not Available!
                                         </div>
                                     </td>
                                 </tr>

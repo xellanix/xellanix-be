@@ -22,12 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-let talk = async function (
-	url = "http://localhost:3000/api/product",
-	type = "json",
-	bodyData = {},
-	callback = (response = new Response()) => {}
-) {
+let talk = async function (url = "http://localhost:3000/api/", type = "json", bodyData = {}) {
 	try {
 		// Use fetch to make an internal request to another route
 		const response = await fetch(url, {
@@ -43,13 +38,35 @@ let talk = async function (
 			throw new Error(`Internal request failed with status ${response.status}: ${errorText}`);
 		}
 
-		callback(response);
+		return response;
 	} catch (error) {
 		console.error("Error:", error.message);
 		res.status(500).send("Internal Server Error");
 	}
 };
 
-let com = { talk };
+let listen = async function (url = "http://localhost:3000/api/", type = "json") {
+	try {
+		// Use fetch to make an internal GET request to another route
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": type === "json" ? "application/json" : "application/text",
+			},
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Internal request failed with status ${response.status}: ${errorText}`);
+		}
+
+		return response;
+	} catch (error) {
+		console.error("Error:", error.message);
+		res.status(500).send("Internal Server Error");
+	}
+};
+
+let com = { talk, listen };
 
 module.exports = com;

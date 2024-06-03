@@ -6,6 +6,15 @@ var connection = require("../library/db");
 var com = require("../library/com");
 
 /**
+ * INDEX PRODUCT
+ */
+router.get("/", async function (req, res, next) {
+	//query
+	const resp = await com.listen("http://localhost:3000/api/product-r", "json");
+	resp && res.render("product/index", { products: await resp.json() });
+});
+
+/**
  * CREATE POST
  */
 router.get("/create", function (req, res, next) {
@@ -21,7 +30,6 @@ router.get("/create", function (req, res, next) {
  * STORE POST
  */
 router.post("/store", async function (req, res, next) {
-	console.log(req.body.access_type);
 	connection.query(
 		"SELECT access_id FROM type_access WHERE access_type = ?",
 		[req.body.access_type],
@@ -36,7 +44,6 @@ router.post("/store", async function (req, res, next) {
 				});
 			} else {
 				access_id = rows[0].access_id;
-				console.log("accent_id: " + access_id);
 				process_create(access_id);
 			}
 		}
@@ -47,19 +54,13 @@ router.post("/store", async function (req, res, next) {
 
 		console.log("accent_id: " + access_id);
 
-		await com.talk(
-			"http://localhost:3000/api/product-c",
-			"json",
-			{
-				access_id: access_id,
-				product_name: product_name,
-				description: description,
-				learn_link: learn_link,
-			},
-			(response) => {
-				res.redirect("/product");
-			}
-		);
+		const resp = await com.talk("http://localhost:3000/api/product-c", "json", {
+			access_id: access_id,
+			product_name: product_name,
+			description: description,
+			learn_link: learn_link,
+		});
+		resp && res.redirect("/product");
 	}
 });
 
