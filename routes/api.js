@@ -5,6 +5,8 @@ var router = express.Router();
 var connection = require("../library/db");
 var com = require("../library/com");
 var utils = require("../library/utils");
+var path = require("path");
+var fs = require("fs");
 
 const localhost = "http://localhost:3000/";
 
@@ -183,6 +185,28 @@ router.post("/member-c", function (req, res, next) {
 			req.flash("error", "Invalid access id");
 			throw new Error("Missing required fields: access_id");
 		}
+
+
+		const file = member_photo;
+		const fileSize = file.size;
+		const ext = path.extreme(file.originalname);
+		const filename = file.filename + ext;
+		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
+		fs.rename(
+			`.public/images/uploads/${file.filename}`,
+			`.public/images/uploads/${filename}`,
+			function (err) {
+				if (err) {
+					errors = true;
+
+					//set flash message
+					req.flash("error", `file rename error: ${err.message}`);
+					throw new Error(`fs rename error: ${err.message}`);
+				}
+			}
+		);
+		formData.member_photo = url;
+		
 
 		const isNullEntries = utils.isNullEntries({ member_name, member_role, member_photo });
 		if (isNullEntries) {

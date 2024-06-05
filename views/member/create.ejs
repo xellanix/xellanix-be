@@ -20,7 +20,7 @@
                     <% } %>
                 <div class="card border-0 shadow rounded">
                     <div class="card-body">
-                        <form action="/member/store" method="post">
+                        <form action="/member/store" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label>Access Type</label>
                                 <select class="form-control" name="access_type" required>
@@ -40,7 +40,7 @@
                            
                             <div class="form-group">
                                 <label>Member Photo</label>
-                                <input type="url" class="form-control" name="member_photo" value="<%= member_photo %>" placeholder="Enter the member photo" required>
+                                <input type="file" class="form-control" name="member_photo" accept="image/png, image/jpeg, image/webp, image/tiff" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Save</button>
                             <button type="reset" class="btn btn-warning">Reset</button>

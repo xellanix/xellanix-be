@@ -1,5 +1,8 @@
 var express = require("express");
 var router = express.Router();
+const multer = require("multer");
+// limit filesize to 5 MB
+const upload = multer({ dest: ".public/images/uploads/", limits: {fileSize: 5000000 } });
 
 //import database
 var connection = require("../library/db");
@@ -23,7 +26,7 @@ router.get("/create", function (req, res, next) {
 	});
 });
 
-router.post("/store", async function (req, res, next) {
+router.post("/store", upload.single("member_photo"), async function (req, res, next) {
 	connection.query(
 		"SELECT access_id FROM type_access WHERE access_type = ?",
 		[req.body.access_type],
@@ -44,8 +47,9 @@ router.post("/store", async function (req, res, next) {
 	);
 
 	async function process_create(access_id) {
-		let { member_name, member_role, member_photo } = req.body;
-
+		let { member_name, member_role } = req.body;
+		let member_photo = req.file;
+		
 		const formData = {
 			access_id: access_id,
 			member_name: member_name,
