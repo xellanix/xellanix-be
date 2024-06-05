@@ -4,15 +4,13 @@ var router = express.Router();
 //import database
 var connection = require("../library/db");
 var com = require("../library/com");
+var utils = require("../library/utils");
 
 const localhost = "http://localhost:3000/";
 
 // Create product
 router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, next) {
 	const { prod_name, prod_desc, prod_url } = req.body;
-
-	// Log the received data
-	console.log("Received data:", req.body);
 
 	const bodyData = {
 		access_id: 1,
@@ -37,20 +35,16 @@ router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, ne
 router.post("/23b9d3e8-ae4d-4420-b136-ea905f7844ed", async function (req, res, next) {
 	const { member_name, member_role, member_img } = req.body;
 
-	// Log the received data
-	console.log("Received data:", req.body);
-
 	const bodyData = {
 		access_id: 1,
 		member_name: member_name,
 		member_role: member_role,
-		member_photo:member_img,
+		member_photo: member_img,
 	};
 
 	const resp = await com.talk(res, localhost + "api/member-c", "json", bodyData);
 	resp && res.json(await resp.json());
 });
-
 
 // Read member
 router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, next) {
@@ -73,45 +67,21 @@ router.post("/product-c", function (req, res, next) {
 	};
 
 	try {
-		console.log(formData);
 		if (access_id < 1 || access_id > 3) {
 			errors = true;
 
 			// set flash message
 			req.flash("error", "Invalid access id");
-			// render to add.ejs with flash message
-			res.render("product/create", formData);
 			throw new Error("Missing required fields: access_id");
 		}
 
-		if (product_name.length === 0) {
+		const isNullEntries = utils.isNullEntries({ product_name, description, learn_link });
+		if (isNullEntries) {
 			errors = true;
 
 			// set flash message
-			req.flash("error", "Please enter the product name");
-			// render to add.ejs with flash message
-			res.render("product/create", formData);
-			throw new Error("Missing required fields: product_name");
-		}
-
-		if (description.length === 0) {
-			errors = true;
-
-			// set flash message
-			req.flash("error", "Please enter the description");
-			// render to add.ejs with flash message
-			res.render("product/create", formData);
-			throw new Error("Missing required fields: description");
-		}
-
-		if (learn_link.length === 0) {
-			errors = true;
-
-			// set flash message
-			req.flash("error", "Please enter the learn link");
-			// render to add.ejs with flash message
-			res.render("product/create", formData);
-			throw new Error("Missing required fields: learn_link");
+			req.flash("error", `Please enter the ${isNullEntries.readableEntry}`);
+			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
 		}
 
 		// if no error
@@ -121,14 +91,7 @@ router.post("/product-c", function (req, res, next) {
 				//if(err) throw err
 				if (err) {
 					req.flash("error", err);
-
-					// render to add.ejs
-					res.render("product/create", {
-						access_id: formData.access_id,
-						product_name: formData.product_name,
-						description: formData.description,
-						learn_link: formData.learn_link,
-					});
+					throw new Error("Query error: " + err.message);
 				} else {
 					req.flash("success", "Data saved successfully");
 					res.json({ message: `Product with name ${product_name} created successfully` });
@@ -148,9 +111,6 @@ router.get("/product-r", function (req, res, next) {
 			function (err, rows) {
 				if (err) {
 					req.flash("error", err);
-					res.render("product", {
-						products: "",
-					});
 					throw new Error("Query error: " + err.message);
 				} else {
 					const items = rows.map((row) => {
@@ -179,9 +139,6 @@ router.get("/member-r", function (req, res, next) {
 			function (err, rows) {
 				if (err) {
 					req.flash("error", err);
-					res.render("member", {
-						members: "",
-					});
 					throw new Error("Query error: " + err.message);
 				} else {
 					const items = rows.map((row) => {
@@ -224,39 +181,16 @@ router.post("/member-c", function (req, res, next) {
 
 			// set flash message
 			req.flash("error", "Invalid access id");
-			// render to add.ejs with flash message
-			res.render("member/create", formData);
 			throw new Error("Missing required fields: access_id");
 		}
 
-		if (member_name.length === 0) {
+		const isNullEntries = utils.isNullEntries({ member_name, member_role, member_photo });
+		if (isNullEntries) {
 			errors = true;
 
 			// set flash message
-			req.flash("error", "Please enter the member_name");
-			// render to add.ejs with flash message
-			res.render("member/create", formData);
-			throw new Error("Missing required fields: member_name");
-		}
-
-		if (member_role.length === 0) {
-			errors = true;
-
-			// set flash message
-			req.flash("error", "Please enter the member_role");
-			// render to add.ejs with flash message
-			res.render("member/create", formData);
-			throw new Error("Missing required fields: member_role");
-		}
-
-		if (member_photo.length === 0) {
-			errors = true;
-
-			// set flash message
-			req.flash("error", "Please enter the member_photo");
-			// render to add.ejs with flash message
-			res.render("member/create", formData);
-			throw new Error("Missing required fields: member_photo");
+			req.flash("error", `Please enter the ${isNullEntries.readableEntry}`);
+			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
 		}
 
 		// if no error
@@ -266,14 +200,7 @@ router.post("/member-c", function (req, res, next) {
 				//if(err) throw err
 				if (err) {
 					req.flash("error", err);
-
-					// render to add.ejs
-					res.render("member/create", {
-						access_id: formData.access_id,
-						member_name: formData.member_name,
-						member_role: formData.member_role,
-						member_photo: formData.member_photo,
-					});
+					throw new Error("Query error: " + err.message);
 				} else {
 					req.flash("success", "Data saved successfully");
 					res.json({ message: `Member with name ${member_name} created successfully` });
@@ -285,6 +212,5 @@ router.post("/member-c", function (req, res, next) {
 		res.status(400).json({ error: error.message });
 	}
 });
-
 
 module.exports = router;

@@ -23,7 +23,7 @@
                         <form action="/member/store" method="post">
                             <div class="form-group">
                                 <label>Access Type</label>
-                                <select class="form-control" name="access_type">
+                                <select class="form-control" name="access_type" required>
                                     <option value="user">User</option>
                                     <option value="admin">Admin</option>
                                     <option value="superadmin">Super Admin</option>
@@ -31,16 +31,16 @@
                             </div>
                             <div class="form-group">
                                 <label>Member Name</label>
-                                <input type="text" class="form-control" name="member_name" value="<%= member_name %>" placeholder="Enter the member name">
+                                <input type="text" class="form-control" name="member_name" value="<%= member_name %>" placeholder="Enter the member name" required>
                             </div>
                             <div class="form-group">
                                 <label>Member Role</label>
-                                <textarea class="form-control" name="member_role" rows="4" placeholder="Enter the member role"><%= member_role %></textarea>
+                                <textarea class="form-control" name="member_role" rows="4" placeholder="Enter the member role" required><%= member_role %></textarea>
                             </div>
                            
                             <div class="form-group">
                                 <label>Member Photo</label>
-                                <input type="url" class="form-control" name="member_photo" value="<%= member_photo %>" placeholder="Enter the member photo">
+                                <input type="url" class="form-control" name="member_photo" value="<%= member_photo %>" placeholder="Enter the member photo" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Save</button>
                             <button type="reset" class="btn btn-warning">Reset</button>

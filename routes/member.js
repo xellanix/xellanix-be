@@ -11,7 +11,7 @@ var com = require("../library/com");
 router.get("/", async function (req, res, next) {
 	//query
 	const resp = await com.listen(res, "http://localhost:3000/api/member-r", "json");
-	resp && res.render("member/index", { members: await resp.json() });
+	res.render("member/index", { members: (await resp?.json()) || "" });
 });
 
 router.get("/create", function (req, res, next) {
@@ -46,13 +46,15 @@ router.post("/store", async function (req, res, next) {
 	async function process_create(access_id) {
 		let { member_name, member_role, member_photo } = req.body;
 
-		const resp = await com.talk(res, "http://localhost:3000/api/member-c", "json", {
-					access_id: access_id,
-					member_name: member_name,
-					member_role: member_role,
-					member_photo: member_photo,
-		});
-		resp && res.redirect("/member");
+		const formData = {
+			access_id: access_id,
+			member_name: member_name,
+			member_role: member_role,
+			member_photo: member_photo,
+		};
+
+		const resp = await com.talk(res, "http://localhost:3000/api/member-c", "json", formData);
+		resp ? res.redirect("/member") : res.render("member/create", formData);
 	}
 });
 

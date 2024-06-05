@@ -23,7 +23,7 @@
                         <form action="/product/store" method="post">
                             <div class="form-group">
                                 <label>Access Type</label>
-                                <select class="form-control" name="access_type">
+                                <select class="form-control" name="access_type" required>
                                     <option value="user">User</option>
                                     <option value="admin">Admin</option>
                                     <option value="superadmin">Super Admin</option>
@@ -31,15 +31,15 @@
                             </div>
                             <div class="form-group">
                                 <label>Product Name</label>
-                                <input type="text" class="form-control" name="product_name" value="<%= product_name %>" placeholder="Enter the product name">
+                                <input type="text" class="form-control" name="product_name" value="<%= product_name %>" placeholder="Enter the product name" required>
                             </div>
                             <div class="form-group">
                                 <label>Description</label>
-                                <textarea class="form-control" name="description" rows="4" placeholder="Enter the description"><%= description %></textarea>
+                                <textarea class="form-control" name="description" rows="4" placeholder="Enter the description" required><%= description %></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Target Link</label>
-                                <input type="url" class="form-control" name="learn_link" value="<%= learn_link %>" placeholder="Enter the target link">
+                                <input type="url" class="form-control" name="learn_link" value="<%= learn_link %>" placeholder="Enter the target link" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Save</button>
                             <button type="reset" class="btn btn-warning">Reset</button>
