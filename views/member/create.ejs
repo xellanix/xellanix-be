@@ -20,7 +20,7 @@
                     <% } %>
                 <div class="card border-0 shadow rounded">
                     <div class="card-body">
-                        <form action="/product/store" method="post">
+                        <form action="/member/store" method="post">
                             <div class="form-group">
                                 <label>Access Type</label>
                                 <select class="form-control" name="access_type">
@@ -30,16 +30,17 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Product Name</label>
-                                <input type="text" class="form-control" name="product_name" value="<%= product_name %>" placeholder="Enter the product name">
+                                <label>Member Name</label>
+                                <input type="text" class="form-control" name="member_name" value="<%= member_name %>" placeholder="Enter the member name">
                             </div>
                             <div class="form-group">
-                                <label>Description</label>
-                                <textarea class="form-control" name="description" rows="4" placeholder="Enter the description"><%= description %></textarea>
+                                <label>Member Role</label>
+                                <textarea class="form-control" name="member_role" rows="4" placeholder="Enter the member role"><%= member_role %></textarea>
                             </div>
+                           
                             <div class="form-group">
-                                <label>Target Link</label>
-                                <input type="url" class="form-control" name="learn_link" value="<%= learn_link %>" placeholder="Enter the target link">
+                                <label>Member Photo</label>
+                                <input type="url" class="form-control" name="member_photo" value="<%= member_photo %>" placeholder="Enter the member photo">
                             </div>
                             <button type="submit" class="btn btn-primary">Save</button>
                             <button type="reset" class="btn btn-warning">Reset</button>
@@ -53,6 +54,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    </script>
 </body>
 </html>

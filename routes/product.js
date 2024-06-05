@@ -10,7 +10,7 @@ var com = require("../library/com");
  */
 router.get("/", async function (req, res, next) {
 	//query
-	const resp = await com.listen("http://localhost:3000/api/product-r", "json");
+	const resp = await com.listen(res, "http://localhost:3000/api/product-r", "json");
 	resp && res.render("product/index", { products: await resp.json() });
 });
 
@@ -54,7 +54,7 @@ router.post("/store", async function (req, res, next) {
 
 		console.log("accent_id: " + access_id);
 
-		const resp = await com.talk("http://localhost:3000/api/product-c", "json", {
+		const resp = await com.talk(res, "http://localhost:3000/api/product-c", "json", {
 			access_id: access_id,
 			product_name: product_name,
 			description: description,

@@ -4,6 +4,7 @@ var router = express.Router();
 //import database
 var connection = require("../library/db");
 var com = require("../library/com");
+
 const localhost = "http://localhost:3000/";
 
 // Create product
@@ -20,23 +21,40 @@ router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, n
 		learn_link: prod_url,
 	};
 
-	const resp = await com.talk(localhost + "api/product-c", "json", bodyData);
+	const resp = await com.talk(res, localhost + "api/product-c", "json", bodyData);
 	resp && res.json(await resp.json());
 });
 
 // Read product
 router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, next) {
-	const resp = await com.listen(localhost + "api/product-r", "json");
+	const resp = await com.listen(res, localhost + "api/product-r", "json");
 	resp && res.json(await resp.json());
 });
 
-// Create product
+// Create member
 // use this UUIDv4:
 // 23b9d3e8-ae4d-4420-b136-ea905f7844ed
+router.post("/23b9d3e8-ae4d-4420-b136-ea905f7844ed", async function (req, res, next) {
+	const { member_name, member_role, member_img } = req.body;
+
+	// Log the received data
+	console.log("Received data:", req.body);
+
+	const bodyData = {
+		access_id: 1,
+		member_name: member_name,
+		member_role: member_role,
+		member_photo:member_img,
+	};
+
+	const resp = await com.talk(res, localhost + "api/member-c", "json", bodyData);
+	resp && res.json(await resp.json());
+});
+
 
 // Read member
 router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, next) {
-	const resp = await com.listen(localhost + "api/member-r", "json");
+	const resp = await com.listen(res, localhost + "api/member-r", "json");
 	resp && res.json(await resp.json());
 });
 
@@ -185,5 +203,88 @@ router.get("/member-r", function (req, res, next) {
 		res.status(400).json({ error: error.message });
 	}
 });
+
+router.post("/member-c", function (req, res, next) {
+	let access_id = req.body.access_id;
+	let member_name = req.body.member_name;
+	let member_role = req.body.member_role;
+	let member_photo = req.body.member_photo;
+	let errors = false;
+
+	let formData = {
+		access_id: access_id,
+		member_name: member_name,
+		member_role: member_role,
+		member_photo: member_photo,
+	};
+
+	try {
+		if (access_id < 1 || access_id > 3) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", "Invalid access id");
+			// render to add.ejs with flash message
+			res.render("member/create", formData);
+			throw new Error("Missing required fields: access_id");
+		}
+
+		if (member_name.length === 0) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", "Please enter the member_name");
+			// render to add.ejs with flash message
+			res.render("member/create", formData);
+			throw new Error("Missing required fields: member_name");
+		}
+
+		if (member_role.length === 0) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", "Please enter the member_role");
+			// render to add.ejs with flash message
+			res.render("member/create", formData);
+			throw new Error("Missing required fields: member_role");
+		}
+
+		if (member_photo.length === 0) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", "Please enter the member_photo");
+			// render to add.ejs with flash message
+			res.render("member/create", formData);
+			throw new Error("Missing required fields: member_photo");
+		}
+
+		// if no error
+		if (!errors) {
+			// insert query
+			connection.query("INSERT INTO member SET ?", formData, function (err, result) {
+				//if(err) throw err
+				if (err) {
+					req.flash("error", err);
+
+					// render to add.ejs
+					res.render("member/create", {
+						access_id: formData.access_id,
+						member_name: formData.member_name,
+						member_role: formData.member_role,
+						member_photo: formData.member_photo,
+					});
+				} else {
+					req.flash("success", "Data saved successfully");
+					res.json({ message: `Member with name ${member_name} created successfully` });
+				}
+			});
+		}
+	} catch (error) {
+		console.error("Error in /api/member-c route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
 
 module.exports = router;

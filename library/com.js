@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-let talk = async function (url = "http://localhost:3000/api/", type = "json", bodyData = {}) {
+let talk = async function (res, url = "http://localhost:3000/api/", type = "json", bodyData = {}) {
 	try {
 		// Use fetch to make an internal request to another route
 		const response = await fetch(url, {
@@ -45,7 +45,7 @@ let talk = async function (url = "http://localhost:3000/api/", type = "json", bo
 	}
 };
 
-let listen = async function (url = "http://localhost:3000/api/", type = "json") {
+let listen = async function (res, url = "http://localhost:3000/api/", type = "json") {
 	try {
 		// Use fetch to make an internal GET request to another route
 		const response = await fetch(url, {
