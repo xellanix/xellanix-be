@@ -3,6 +3,9 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var dotenv = require("dotenv");
+dotenv.config();
+
 
 //library
 var flash = require("express-flash");
@@ -12,7 +15,7 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+var userRouter = require("./routes/user");
 var productRouter = require("./routes/product");
 var memberRouter = require("./routes/member");
 var apiRouter = require("./routes/api");
@@ -48,7 +51,7 @@ app.use(
 app.use(flash());
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/member", memberRouter);
 app.use("/api", apiRouter);
