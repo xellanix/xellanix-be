@@ -1,5 +1,8 @@
 var express = require("express");
 var router = express.Router();
+const multer = require("multer");
+//limit filesize to 5 MB
+const upload = multer({ dest: "./public/images/uploads/", limits: { fileSize: 5000000 } });
 
 //import database
 var connection = require("../library/db");
@@ -34,19 +37,24 @@ router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, ne
 // Create member
 // use this UUIDv4:
 // 23b9d3e8-ae4d-4420-b136-ea905f7844ed
-router.post("/23b9d3e8-ae4d-4420-b136-ea905f7844ed", async function (req, res, next) {
-	const { member_name, member_role, member_img } = req.body;
+router.post(
+	"/23b9d3e8-ae4d-4420-b136-ea905f7844ed",
+	upload.single("member_img"),
+	async function (req, res, next) {
+		const { member_name, member_role } = req.body;
+		const member_img = req.file;
 
-	const bodyData = {
-		access_id: 1,
-		member_name: member_name,
-		member_role: member_role,
-		member_photo: member_img,
-	};
+		const bodyData = {
+			access_id: 1,
+			member_name: member_name,
+			member_role: member_role,
+			member_photo: member_img,
+		};
 
-	const resp = await com.talk(res, localhost + "api/member-c", "json", bodyData);
-	resp && res.json(await resp.json());
-});
+		const resp = await com.talk(res, localhost + "api/member-c", "json", bodyData);
+		resp && res.json(await resp.json());
+	}
+);
 
 // Read member
 router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, next) {
@@ -137,7 +145,7 @@ router.get("/product-r", function (req, res, next) {
 router.get("/member-r", function (req, res, next) {
 	try {
 		connection.query(
-			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY member_id, member_role, member_name",
+			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name",
 			function (err, rows) {
 				if (err) {
 					req.flash("error", err);
@@ -186,28 +194,6 @@ router.post("/member-c", function (req, res, next) {
 			throw new Error("Missing required fields: access_id");
 		}
 
-
-		const file = member_photo;
-		const fileSize = file.size;
-		const ext = path.extreme(file.originalname);
-		const filename = file.filename + ext;
-		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
-		fs.rename(
-			`.public/images/uploads/${file.filename}`,
-			`.public/images/uploads/${filename}`,
-			function (err) {
-				if (err) {
-					errors = true;
-
-					//set flash message
-					req.flash("error", `file rename error: ${err.message}`);
-					throw new Error(`fs rename error: ${err.message}`);
-				}
-			}
-		);
-		formData.member_photo = url;
-		
-
 		const isNullEntries = utils.isNullEntries({ member_name, member_role, member_photo });
 		if (isNullEntries) {
 			errors = true;
@@ -216,6 +202,26 @@ router.post("/member-c", function (req, res, next) {
 			req.flash("error", `Please enter the ${isNullEntries.readableEntry}`);
 			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
 		}
+
+		const file = member_photo;
+		const fileSize = file.size;
+		const ext = path.extname(file.originalname);
+		const filename = file.filename + ext;
+		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
+		fs.rename(
+			`./public/images/uploads/${file.filename}`,
+			`./public/images/uploads/${filename}`,
+			function (err) {
+				if (err) {
+					errors = true;
+
+					// set flash message
+					req.flash("error", `file rename error: ${err.message}`);
+					throw new Error(`fs rename error: ${err.message}`);
+				}
+			}
+		);
+		formData.member_photo = url;
 
 		// if no error
 		if (!errors) {

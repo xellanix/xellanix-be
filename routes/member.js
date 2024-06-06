@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const multer = require("multer");
 // limit filesize to 5 MB
-const upload = multer({ dest: ".public/images/uploads/", limits: {fileSize: 5000000 } });
+const upload = multer({ dest: ".public/images/uploads/", limits: { fileSize: 5000000 } });
 
 //import database
 var connection = require("../library/db");
