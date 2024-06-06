@@ -6,7 +6,6 @@ var logger = require("morgan");
 var dotenv = require("dotenv");
 dotenv.config();
 
-
 //library
 var flash = require("express-flash");
 var session = require("express-session");
@@ -15,11 +14,10 @@ var bodyParser = require("body-parser");
 var cors = require("cors");
 
 var indexRouter = require("./routes/index");
-var userRouter = require("./routes/user");
+var authRouter = require("./routes/auth");
 var productRouter = require("./routes/product");
 var memberRouter = require("./routes/member");
 var apiRouter = require("./routes/api");
-
 var app = express();
 
 // view engine setup
@@ -33,7 +31,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware setup
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({ credentials: true })); // Enable CORS for all routes
 app.use(bodyParser.json());
 
 app.use(
@@ -51,7 +49,7 @@ app.use(
 app.use(flash());
 
 app.use("/", indexRouter);
-app.use("/user", userRouter);
+app.use("/auth", authRouter);
 app.use("/product", productRouter);
 app.use("/member", memberRouter);
 app.use("/api", apiRouter);
