@@ -11,7 +11,11 @@ var com = require("../library/com");
 router.get("/", async function (req, res, next) {
 	//query
 	const resp = await com.listen(res, "http://localhost:3000/api/product-r", "json");
-	res.render("product/index", { products: (await resp?.json()) || "" });
+	const rjson = await resp?.json();
+	let filteredResp = rjson?.filter((item) => {
+		return item?.access_type === "user";
+	});
+	res.render("product/index", { products: filteredResp || "" });
 });
 
 /**

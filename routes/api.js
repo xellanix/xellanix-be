@@ -185,6 +185,8 @@ router.post("/member-c", function (req, res, next) {
 		member_photo: member_photo,
 	};
 
+	console.log(formData);
+
 	try {
 		if (access_id < 1 || access_id > 3) {
 			errors = true;
