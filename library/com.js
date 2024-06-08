@@ -67,6 +67,13 @@ let listen = async function (res, url = "http://localhost:3000/api/", type = "js
 	}
 };
 
-let com = { talk, listen };
+let getToken = function (req) {
+	const authHeader = req.headers["authorization"];
+	const token = authHeader && authHeader.split(" ")[1];
+
+	return token;
+};
+
+let com = { talk, listen, getToken };
 
 module.exports = com;

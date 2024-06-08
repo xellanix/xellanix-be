@@ -5,9 +5,10 @@ const multer = require("multer");
 const upload = multer({ dest: "./public/images/uploads/", limits: { fileSize: 5000000 } });
 
 //import database
-var connection = require("../library/db");
+var { connect, executeQuery, executeQueryWithParams } = require("../library/db");
 var com = require("../library/com");
 var utils = require("../library/utils");
+var { verifyTokenFn } = require("../middleware/verifyToken");
 var path = require("path");
 var fs = require("fs");
 
@@ -28,10 +29,53 @@ router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, n
 	resp && res.json(await resp.json());
 });
 
+async function getAccessID() {
+	try {
+		const [results, fields] = await executeQuery("SELECT * FROM type_access");
+
+		return results;
+	} catch (error) {
+		throw new Error("Query error: " + err.message);
+	}
+}
+
+async function filterAsync(arr, callback) {
+	const results = await Promise.all(arr.map(callback));
+
+	return arr.filter((_item, index) => results[index]);
+}
+
 // Read product
 router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, next) {
+	const verify = verifyTokenFn(req);
+	const access_id = req?.decoded?.access_id || 1;
+
 	const resp = await com.listen(res, localhost + "api/product-r", "json");
-	resp && res.json(await resp.json());
+	const rjson = await resp?.json();
+
+	const accessID = await getAccessID();
+
+	const findAccessID = (access_type) =>
+		accessID.find((row) => {
+			return row.access_type == access_type;
+		})?.access_id || 1;
+
+	let filteredResp = await filterAsync(rjson, (item) => {
+		const item_access_id = findAccessID(item.access_type);
+		return item_access_id <= access_id;
+	});
+
+	resp &&
+		res.json({
+			items: filteredResp,
+			action:
+				access_id >= 2
+					? {
+							edit: access_id >= 2,
+							delete: access_id >= 2,
+					  }
+					: {},
+		});
 });
 
 // Create member
@@ -58,11 +102,38 @@ router.post(
 
 // Read member
 router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, next) {
+	const verify = verifyTokenFn(req);
+	const access_id = req?.decoded?.access_id || 1;
+
 	const resp = await com.listen(res, localhost + "api/member-r", "json");
-	resp && res.json(await resp.json());
+	const rjson = await resp?.json();
+
+	const accessID = await getAccessID();
+
+	const findAccessID = (access_type) =>
+		accessID.find((row) => {
+			return row.access_type == access_type;
+		})?.access_id || 1;
+
+	let filteredResp = await filterAsync(rjson, (item) => {
+		const item_access_id = findAccessID(item.access_type);
+		return item_access_id <= access_id;
+	});
+
+	resp &&
+		res.json({
+			items: filteredResp,
+			action:
+				access_id >= 2
+					? {
+							edit: access_id >= 2,
+							delete: access_id >= 2,
+					  }
+					: {},
+		});
 });
 
-router.post("/product-c", function (req, res, next) {
+router.post("/product-c", async function (req, res, next) {
 	let access_id = req.body.access_id;
 	let product_name = req.body.product_name;
 	let description = req.body.description;
@@ -97,16 +168,10 @@ router.post("/product-c", function (req, res, next) {
 		// if no error
 		if (!errors) {
 			// insert query
-			connection.query("INSERT INTO product SET ?", formData, function (err, result) {
-				//if(err) throw err
-				if (err) {
-					req.flash("error", err);
-					throw new Error("Query error: " + err.message);
-				} else {
-					req.flash("success", "Data saved successfully");
-					res.json({ message: `Product with name ${product_name} created successfully` });
-				}
-			});
+			await executeQueryWithParams("INSERT INTO product SET ?", formData);
+
+			req.flash("success", "Data saved successfully");
+			res.json({ message: `Product with name ${product_name} created successfully` });
 		}
 	} catch (error) {
 		console.error("Error in /api/product-c route:", error.message);
@@ -114,64 +179,52 @@ router.post("/product-c", function (req, res, next) {
 	}
 });
 
-router.get("/product-r", function (req, res, next) {
+router.get("/product-r", async function (req, res, next) {
 	try {
-		connection.query(
-			"SELECT product_id, access_type, product_name, description, learn_link FROM product JOIN type_access ON product.access_id = type_access.access_id ORDER BY type_access.access_id, product_id, product_name",
-			function (err, rows) {
-				if (err) {
-					req.flash("error", err);
-					throw new Error("Query error: " + err.message);
-				} else {
-					const items = rows.map((row) => {
-						return {
-							product_id: row.product_id,
-							access_type: row.access_type,
-							product_name: row.product_name,
-							description: row.description,
-							learn_link: row.learn_link,
-						};
-					});
-					res.json(items);
-				}
-			}
+		const [rows] = await executeQuery(
+			"SELECT product_id, access_type, product_name, description, learn_link FROM product JOIN type_access ON product.access_id = type_access.access_id ORDER BY type_access.access_id, product_id, product_name"
 		);
+
+		const items = rows.map((row) => {
+			return {
+				product_id: row.product_id,
+				access_type: row.access_type,
+				product_name: row.product_name,
+				description: row.description,
+				learn_link: row.learn_link,
+			};
+		});
+		res.json(items);
 	} catch (error) {
 		console.error("Error in /api/product-r route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });
 
-router.get("/member-r", function (req, res, next) {
+router.get("/member-r", async function (req, res, next) {
 	try {
-		connection.query(
-			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name",
-			function (err, rows) {
-				if (err) {
-					req.flash("error", err);
-					throw new Error("Query error: " + err.message);
-				} else {
-					const items = rows.map((row) => {
-						const member = {
-							member_id: row.member_id,
-							access_type: row.access_type,
-							member_name: row.member_name,
-							member_role: row.member_role,
-							member_photo: row.member_photo,
-						};
-						return member;
-					});
-					res.json(items);
-				}
-			}
+		const [rows] = await executeQuery(
+			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name"
 		);
+
+		const items = rows.map((row) => {
+			const member = {
+				member_id: row.member_id,
+				access_type: row.access_type,
+				member_name: row.member_name,
+				member_role: row.member_role,
+				member_photo: row.member_photo,
+			};
+			return member;
+		});
+		res.json(items);
 	} catch (error) {
 		console.error("Error in /api/member-r route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });
 
-router.post("/member-c", function (req, res, next) {
+router.post("/member-c", async function (req, res, next) {
 	let access_id = req.body.access_id;
 	let member_name = req.body.member_name;
 	let member_role = req.body.member_role;
@@ -228,16 +281,10 @@ router.post("/member-c", function (req, res, next) {
 		// if no error
 		if (!errors) {
 			// insert query
-			connection.query("INSERT INTO member SET ?", formData, function (err, result) {
-				//if(err) throw err
-				if (err) {
-					req.flash("error", err);
-					throw new Error("Query error: " + err.message);
-				} else {
-					req.flash("success", "Data saved successfully");
-					res.json({ message: `Member with name ${member_name} created successfully` });
-				}
-			});
+			await executeQueryWithParams("INSERT INTO member SET ?", formData);
+
+			req.flash("success", "Data saved successfully");
+			res.json({ message: `Member with name ${member_name} created successfully` });
 		}
 	} catch (error) {
 		console.error("Error in /api/member-c route:", error.message);

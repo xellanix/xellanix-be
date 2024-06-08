@@ -1,9 +1,11 @@
 var Users = require("../models/userModel");
 var jwt = require("jsonwebtoken");
+var com = require("../library/com");
+var jwt_decode = require("jwt-decode");
 
 const refreshToken = async (req, res) => {
 	try {
-		const refreshToken = req.cookies.refreshToken;
+		const refreshToken = com.getToken(req);
 		if (!refreshToken) return res.sendStatus(401);
 		const user = await Users.findAll({
 			where: {
@@ -16,10 +18,16 @@ const refreshToken = async (req, res) => {
 			const userId = user[0].user_id;
 			const name = user[0].username;
 			const email = user[0].email;
-			const accessToken = jwt.sign({ userId, name, email }, process.env.ACCESS_TOKEN_SECRET, {
-				expiresIn: "15s",
-			});
-			res.json({ accessToken });
+			const access_id = user[0].access_id;
+			const accessToken = jwt.sign(
+				{ userId, name, email, access_id },
+				process.env.ACCESS_TOKEN_SECRET,
+				{
+					expiresIn: "20s",
+				}
+			);
+			const jwt_decoded = jwt_decode.jwtDecode(accessToken);
+			res.json({ accessToken, jwt_decoded });
 		});
 	} catch (error) {
 		console.log(error);

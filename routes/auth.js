@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var { getUsers, signup, signin, signout } = require("../controllers/users");
-var verifyToken = require("../middleware/verifyToken");
+var { verifyToken } = require("../middleware/verifyToken");
 var refreshToken = require("../controllers/refreshToken");
 
 router.post("/", signin);

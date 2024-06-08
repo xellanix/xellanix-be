@@ -31,7 +31,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware setup
-app.use(cors({ credentials: true })); // Enable CORS for all routes
+app.use(
+	cors({
+		origin: "http://127.0.0.1:5501", // Specify the frontend's origin,
+		credentials: true,
+	})
+); // Enable CORS for all routes
 app.use(bodyParser.json());
 
 app.use(
