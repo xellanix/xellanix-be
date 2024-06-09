@@ -22,7 +22,8 @@ const connect = async () => {
 
 const executeQueryWithParams = async (query, params) => {
 	const connection = await connect();
-	const [rows, fields] = await connection.execute(query, params);
+	const formated = mysql.format(query, !Array.isArray(params) ? [params] : params);
+	const [rows, fields] = await connection.execute(formated);
 	return [rows, fields];
 };
 
