@@ -201,6 +201,53 @@ router.get("/product-r", async function (req, res, next) {
 	}
 });
 
+router.post("/product-u/(:id)", async function (req, res, next) {
+	let product_id = req.params.id;
+	let { access_id, product_name, description, learn_link } = req.body;
+	let errors = false;
+
+	let formData = {
+		access_id: access_id,
+		product_name: product_name,
+		description: description,
+		learn_link: learn_link,
+	};
+
+	try {
+		if (access_id < 1 || access_id > 3) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", "Invalid access id");
+			throw new Error("Missing required fields: access_id");
+		}
+
+		const isNullEntries = utils.isNullEntries({ product_name, description, learn_link });
+		if (isNullEntries) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", `Please enter the ${isNullEntries.readableEntry}`);
+			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
+		}
+
+		// if no error
+		if (!errors) {
+			// insert query
+			await executeQueryWithParams("UPDATE product SET ? WHERE product_id = ?", [
+				formData,
+				product_id,
+			]);
+
+			req.flash("success", "Data updated successfully");
+			res.json({ message: `Product with name ${product_name} updated successfully` });
+		}
+	} catch (error) {
+		console.error("Error in /api/product-u route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
 router.get("/product-d/(:id)", async function (req, res, next) {
 	try {
 		let id = req.params.id;
@@ -303,6 +350,76 @@ router.get("/member-r", async function (req, res, next) {
 		res.json(items);
 	} catch (error) {
 		console.error("Error in /api/member-r route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
+router.post("/member-u/(:id)", async function (req, res, next) {
+	let member_id = req.params.id;
+	let { access_id, member_name, member_role, member_photo } = req.body;
+
+	let formData = {
+		access_id: access_id,
+		member_name: member_name,
+		member_role: member_role,
+		member_photo: member_photo,
+	};
+
+	try {
+		if (access_id < 1 || access_id > 3) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", "Invalid access id");
+			throw new Error("Missing required fields: access_id");
+		}
+
+		const isNullEntries = utils.isNullEntries({ member_name, member_role, member_photo });
+		if (isNullEntries) {
+			errors = true;
+
+			// set flash message
+			req.flash("error", `Please enter the ${isNullEntries.readableEntry}`);
+			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
+		}
+
+		const [member_photos_old] = await executeQueryWithParams(
+			"SELECT member_photo FROM member WHERE member_id = ?",
+			[member_id]
+		);
+		const member_photo_old = member_photos_old[0].member_photo.replace(
+			`http://localhost:3000/images/uploads/`,
+			""
+		);
+		fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
+
+		const file = member_photo;
+		const fileSize = file.size;
+		const ext = path.extname(file.originalname);
+		const filename = file.filename + ext;
+		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
+		fs.rename(
+			`./public/images/uploads/${file.filename}`,
+			`./public/images/uploads/${filename}`,
+			function (err) {
+				if (err) {
+					errors = true;
+					req.flash("error", `file rename error: ${err.message}`);
+					throw new Error(`fs rename error: ${err.message}`);
+				}
+			}
+		);
+		formData.member_photo = url;
+
+		await executeQueryWithParams("UPDATE member SET ? WHERE member_id = ?", [
+			formData,
+			member_id,
+		]);
+
+		req.flash("success", "Data updated successfully");
+		res.json({ message: `Member with name ${member_name} updated successfully` });
+	} catch (error) {
+		console.error("Error in /api/member-u route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });

@@ -63,6 +63,70 @@ router.post("/store", upload.single("member_photo"), async function (req, res, n
 	}
 });
 
+router.get("/edit/(:id)", async function (req, res, next) {
+	let member_id = req.params.id;
+
+	try {
+		const [rows, fields] = await executeQueryWithParams(
+			"SELECT * FROM member WHERE member_id = ?",
+			[member_id]
+		);
+
+		res.render("member/edit", {
+			member_id: rows[0].member_id,
+			access_id: rows[0].access_id,
+			member_name: rows[0].member_name,
+			member_role: rows[0].member_role,
+			member_photo: rows[0].member_photo,
+		});
+	} catch (err) {
+		console.error(err);
+		req.flash("error", "Terjadi kesalahan saat mengambil data member");
+		res.redirect("/member");
+	}
+});
+
+/**
+ * UPDATE POST
+ */
+router.post("/update/(:id)", upload.single("member_photo"), async function (req, res, next) {
+	try {
+		let member_id = req.params.id;
+		let { access_type, member_name, member_role } = req.body;
+		let member_photo = req.file;
+
+		const [access_id] = await executeQueryWithParams(
+			"SELECT access_id FROM type_access WHERE access_type = ?",
+			[access_type]
+		);
+
+		const formData = {
+			access_id: access_id[0].access_id,
+			member_name: member_name,
+			member_role: member_role,
+			member_photo: member_photo,
+		};
+
+		const resp = await com.talk(
+			res,
+			`http://localhost:3000/api/member-u/${member_id}`,
+			"json",
+			formData
+		);
+		resp ? res.redirect("/member") : res.render("member/update/(:id)", formData);
+	} catch (err) {
+		console.error(err);
+		req.flash("error", err.message);
+		res.render("member/edit", {
+			member_id: member_id,
+			access_id: access_id[0].access_id,
+			member_name: member_name,
+			member_role: member_role,
+			member_photo: member_photo,
+		});
+	}
+});
+
 router.get("/delete/(:id)", async function (req, res, next) {
 	let id = req.params.id;
 
