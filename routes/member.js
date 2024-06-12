@@ -63,4 +63,13 @@ router.post("/store", upload.single("member_photo"), async function (req, res, n
 	}
 });
 
+router.get("/delete/(:id)", async function (req, res, next) {
+	let id = req.params.id;
+
+	const resp = await com.listen(res, `http://localhost:3000/api/member-d/${id}`, "json");
+	const rjson = await resp?.json();
+	console.log(rjson);
+	res.redirect("/member");
+});
+
 module.exports = router;

@@ -201,25 +201,17 @@ router.get("/product-r", async function (req, res, next) {
 	}
 });
 
-router.get("/member-r", async function (req, res, next) {
+router.get("/product-d/(:id)", async function (req, res, next) {
 	try {
-		const [rows] = await executeQuery(
-			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name"
-		);
+		let id = req.params.id;
+		const [rows] = await executeQueryWithParams("DELETE FROM product WHERE product_id = ?", [
+			id,
+		]);
 
-		const items = rows.map((row) => {
-			const member = {
-				member_id: row.member_id,
-				access_type: row.access_type,
-				member_name: row.member_name,
-				member_role: row.member_role,
-				member_photo: row.member_photo,
-			};
-			return member;
-		});
-		res.json(items);
+		req.flash("success", "Data deleted successfully");
+		res.json({ message: `Product with id ${id} deleted successfully` });
 	} catch (error) {
-		console.error("Error in /api/member-r route:", error.message);
+		console.error("Error in /api/product-d route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });
@@ -288,6 +280,42 @@ router.post("/member-c", async function (req, res, next) {
 		}
 	} catch (error) {
 		console.error("Error in /api/member-c route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
+router.get("/member-r", async function (req, res, next) {
+	try {
+		const [rows] = await executeQuery(
+			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name"
+		);
+
+		const items = rows.map((row) => {
+			const member = {
+				member_id: row.member_id,
+				access_type: row.access_type,
+				member_name: row.member_name,
+				member_role: row.member_role,
+				member_photo: row.member_photo,
+			};
+			return member;
+		});
+		res.json(items);
+	} catch (error) {
+		console.error("Error in /api/member-r route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
+router.get("/member-d/(:id)", async function (req, res, next) {
+	try {
+		let id = req.params.id;
+		const [rows] = await executeQueryWithParams("DELETE FROM member WHERE member_id = ?", [id]);
+
+		req.flash("success", "Data deleted successfully");
+		res.json({ message: `Member with id ${id} deleted successfully` });
+	} catch (error) {
+		console.error("Error in /api/member-d route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });

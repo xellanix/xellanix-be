@@ -61,4 +61,13 @@ router.post("/store", async function (req, res, next) {
 	}
 });
 
+router.get("/delete/(:id)", async function (req, res, next) {
+	let id = req.params.id;
+
+	const resp = await com.listen(res, `http://localhost:3000/api/product-d/${id}`, "json");
+	const rjson = await resp?.json();
+	console.log(rjson);
+	res.redirect("/product");
+});
+
 module.exports = router;
