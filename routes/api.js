@@ -320,6 +320,28 @@ router.get("/product-r", async function (req, res, next) {
 	}
 });
 
+router.get("/product-gu/(:id)", async function (req, res, next) {
+	const product_id = req.params.id;
+
+	try {
+		const [rows, fields] = await executeQueryWithParams(
+			"SELECT * FROM product WHERE product_id = ?",
+			[product_id]
+		);
+
+		res.json({
+			product_id: rows[0].product_id,
+			access_id: rows[0].access_id,
+			product_name: rows[0].product_name,
+			description: rows[0].description,
+			learn_link: rows[0].learn_link,
+		});
+	} catch (error) {
+		console.error("Error in /api/product-gu route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
 router.post("/product-u/(:id)", async function (req, res, next) {
 	let product_id = req.params.id;
 	let { access_id, product_name, description, learn_link } = req.body;
@@ -542,6 +564,28 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 		res.json({ message: `Member with name ${member_name} updated successfully` });
 	} catch (error) {
 		console.error("Error in /api/member-u route:", error.message);
+		res.status(400).json({ error: error.message });
+	}
+});
+
+router.get("/member-gu/(:id)", async function (req, res, next) {
+	const member_id = req.params.id;
+
+	try {
+		const [rows, fields] = await executeQueryWithParams(
+			"SELECT * FROM member WHERE member_id = ?",
+			[member_id]
+		);
+
+		res.json({
+			member_id: rows[0].member_id,
+			access_id: rows[0].access_id,
+			member_name: rows[0].member_name,
+			member_role: rows[0].member_role,
+			member_photo: rows[0].member_photo,
+		});
+	} catch (error) {
+		console.error("Error in /api/member-gu route:", error.message);
 		res.status(400).json({ error: error.message });
 	}
 });

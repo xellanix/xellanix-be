@@ -64,24 +64,23 @@ router.post("/store", async function (req, res, next) {
 //edit post
 router.get("/edit/(:id)", async function (req, res, next) {
 	let product_id = req.params.id;
+	const resp = await com.listen(
+		res,
+		`http://localhost:3000/api/product-gu/${product_id}`,
+		"json"
+	);
 
-	try {
-		const [rows, fields] = await executeQueryWithParams(
-			"SELECT * FROM product WHERE product_id = ?",
-			[product_id]
-		);
-
-		// render to edit.ejs
+	if (resp) {
+		const rjson = await resp.json();
 		res.render("product/edit", {
-			product_id: rows[0].product_id,
-			access_id: rows[0].access_id,
-			product_name: rows[0].product_name,
-			description: rows[0].description,
-			learn_link: rows[0].learn_link,
+			product_id: rjson.product_id,
+			access_id: rjson.access_id,
+			product_name: rjson.product_name,
+			description: rjson.description,
+			learn_link: rjson.learn_link,
 		});
-	} catch (err) {
-		console.error(err);
-		req.flash("error", "Terjadi kesalahan saat mengambil data produk");
+	} else {
+		req.flash("error", "There's a failure when fetching product data");
 		res.redirect("/product");
 	}
 });
