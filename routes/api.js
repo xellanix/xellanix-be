@@ -32,6 +32,10 @@ async function filterAsync(arr, callback) {
 
 // Create product
 router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, next) {
+	const verify = verifyTokenFn(req);
+	const user_access_id = req?.decoded?.access_id || 1;
+	if (!user_access_id || user_access_id === 1) return;
+
 	const { prod_name, prod_desc, prod_url } = req.body;
 
 	const bodyData = {
@@ -159,6 +163,10 @@ router.post(
 	"/23b9d3e8-ae4d-4420-b136-ea905f7844ed",
 	upload.single("member_img"),
 	async function (req, res, next) {
+		const verify = verifyTokenFn(req);
+		const user_access_id = req?.decoded?.access_id || 1;
+		if (!user_access_id || user_access_id === 1) return;
+
 		const { member_name, member_role } = req.body;
 		const member_img = req.file;
 
