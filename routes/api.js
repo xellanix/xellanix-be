@@ -510,7 +510,10 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			`http://localhost:3000/images/uploads/`,
 			""
 		);
-		fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
+		// check if the file exists
+		if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
+			fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
+		}
 
 		const file = member_photo;
 		const fileSize = file.size;
@@ -558,7 +561,10 @@ router.get("/member-d/(:id)", async function (req, res, next) {
 			`http://localhost:3000/images/uploads/`,
 			""
 		);
-		fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
+		// check if the file exists
+		if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
+			fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
+		}
 
 		req.flash("success", "Data deleted successfully");
 		res.json({ message: `Member with id ${id} deleted successfully` });
