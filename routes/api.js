@@ -83,36 +83,17 @@ router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, ne
 });
 
 // Get product info (update)
-router.get("/9b6c7e7d-9d7f-4c60-80eb-ac24cef7f264", async function (req, res, next) {
+router.get("/9b6c7e7d-9d7f-4c60-80eb-ac24cef7f264/(:id)", async function (req, res, next) {
 	const verify = verifyTokenFn(req);
-	const access_id = req?.decoded?.access_id || 1;
+	const user_access_id = req?.decoded?.access_id || 1;
+	if (!user_access_id || user_access_id === 1) return;
 
-	const resp = await com.listen(res, localhost + "api/product-gu", "json");
+	const product_id = req.params.id;
+
+	const resp = await com.listen(res, `${localhost}api/product-gu/${product_id}`, "json");
 	const rjson = await resp?.json();
 
-	const accessID = await getAccessID();
-
-	const findAccessID = (access_type) =>
-		accessID.find((row) => {
-			return row.access_type == access_type;
-		})?.access_id || 1;
-
-	let filteredResp = await filterAsync(rjson, (item) => {
-		const item_access_id = findAccessID(item.access_type);
-		return item_access_id <= access_id;
-	});
-
-	resp &&
-		res.json({
-			items: filteredResp,
-			action:
-				access_id >= 2
-					? {
-							edit: access_id >= 2,
-							delete: access_id >= 2,
-					  }
-					: {},
-		});
+	resp && res.json(rjson);
 });
 
 // Update product
@@ -122,13 +103,13 @@ router.post("/b137a6ba-db3d-4a82-a5c5-d0b33cd2cbf9/(:id)", async function (req, 
 	if (!user_access_id || user_access_id === 1) return;
 
 	const product_id = req.params.id;
-	let { product_name, description, learn_link } = req.body;
+	let { prod_name, prod_desc, prod_url } = req.body;
 
 	const formData = {
 		access_id: 1,
-		product_name: product_name,
-		description: description,
-		learn_link: learn_link,
+		product_name: prod_name,
+		description: prod_desc,
+		learn_link: prod_url,
 	};
 
 	const resp = await com.talk(
@@ -155,8 +136,6 @@ router.get("/295c6c91-e2b9-4c53-bc27-0b7bdcf3c517/(:id)", async function (req, r
 
 	resp && res.json(rjson);
 });
-
-module.exports = router;
 
 // Create member
 router.post(
@@ -216,26 +195,44 @@ router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, ne
 });
 
 // Get member info (update)
+router.get("/9cb41cdb-70fb-4957-984d-d649c39130a1/(:id)", async function (req, res, next) {
+	const verify = verifyTokenFn(req);
+	const user_access_id = req?.decoded?.access_id || 1;
+	if (!user_access_id || user_access_id === 1) return;
+
+	const member_id = req.params.id;
+
+	const resp = await com.listen(res, `${localhost}api/member-gu/${member_id}`, "json");
+	const rjson = await resp?.json();
+
+	resp && res.json(rjson);
+});
 
 // Update member
 router.post(
 	"/2a4bb58c-3fbd-429a-ad26-ced47bae82a7/(:id)",
-	upload.single("member_photo"),
+	upload.single("member_img"),
 	async function (req, res, next) {
 		const verify = verifyTokenFn(req);
 		const user_access_id = req?.decoded?.access_id || 1;
 		if (!user_access_id || user_access_id === 1) return;
 
 		let member_id = req.params.id;
-		let { member_name, member_role } = req.body;
-		let member_photo = req.file;
+		const { member_name, member_role } = req.body;
+		const member_img = req.file;
 
-		const formData = {
-			access_id: 1,
-			member_name: member_name,
-			member_role: member_role,
-			member_photo: member_photo,
-		};
+		const formData = member_img
+			? {
+					access_id: 1,
+					member_name: member_name,
+					member_role: member_role,
+					member_photo: member_img,
+			  }
+			: {
+					access_id: 1,
+					member_name: member_name,
+					member_role: member_role,
+			  };
 
 		const resp = await com.talk(
 			res,
@@ -254,7 +251,7 @@ router.get("/bd7d187c-0fe5-4887-870c-81aa2b6a4152/(:id)", async function (req, r
 	if (!user_access_id || user_access_id === 1) return;
 
 	const member_id = req.params.id;
-	const resp = await com.listen(res, `http://localhost:3000/api/member-d/${id}`, "json");
+	const resp = await com.listen(res, `http://localhost:3000/api/member-d/${member_id}`, "json");
 	const rjson = await resp?.json();
 
 	resp && res.json(rjson);
@@ -507,12 +504,18 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 	let member_id = req.params.id;
 	let { access_id, member_name, member_role, member_photo } = req.body;
 
-	let formData = {
-		access_id: access_id,
-		member_name: member_name,
-		member_role: member_role,
-		member_photo: member_photo,
-	};
+	let formData = member_photo
+		? {
+				access_id: access_id,
+				member_name: member_name,
+				member_role: member_role,
+				member_photo: member_photo,
+		  }
+		: {
+				access_id: access_id,
+				member_name: member_name,
+				member_role: member_role,
+		  };
 
 	try {
 		if (access_id < 1 || access_id > 3) {
@@ -523,7 +526,9 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			throw new Error("Missing required fields: access_id");
 		}
 
-		const isNullEntries = utils.isNullEntries({ member_name, member_role, member_photo });
+		const isNullEntries = utils.isNullEntries(
+			member_photo ? { member_name, member_role, member_photo } : { member_name, member_role }
+		);
 		if (isNullEntries) {
 			errors = true;
 
@@ -532,36 +537,38 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
 		}
 
-		const [member_photos_old] = await executeQueryWithParams(
-			"SELECT member_photo FROM member WHERE member_id = ?",
-			[member_id]
-		);
-		const member_photo_old = member_photos_old[0].member_photo.replace(
-			`http://localhost:3000/images/uploads/`,
-			""
-		);
-		// check if the file exists
-		if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
-			fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
-		}
-
-		const file = member_photo;
-		const fileSize = file.size;
-		const ext = path.extname(file.originalname);
-		const filename = file.filename + ext;
-		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
-		fs.rename(
-			`./public/images/uploads/${file.filename}`,
-			`./public/images/uploads/${filename}`,
-			function (err) {
-				if (err) {
-					errors = true;
-					req.flash("error", `file rename error: ${err.message}`);
-					throw new Error(`fs rename error: ${err.message}`);
-				}
+		if (member_photo) {
+			const [member_photos_old] = await executeQueryWithParams(
+				"SELECT member_photo FROM member WHERE member_id = ?",
+				[member_id]
+			);
+			const member_photo_old = member_photos_old[0].member_photo.replace(
+				`http://localhost:3000/images/uploads/`,
+				""
+			);
+			// check if the file exists
+			if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
+				fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
 			}
-		);
-		formData.member_photo = url;
+
+			const file = member_photo;
+			const fileSize = file.size;
+			const ext = path.extname(file.originalname);
+			const filename = file.filename + ext;
+			const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
+			fs.rename(
+				`./public/images/uploads/${file.filename}`,
+				`./public/images/uploads/${filename}`,
+				function (err) {
+					if (err) {
+						errors = true;
+						req.flash("error", `file rename error: ${err.message}`);
+						throw new Error(`fs rename error: ${err.message}`);
+					}
+				}
+			);
+			formData.member_photo = url;
+		}
 
 		await executeQueryWithParams("UPDATE member SET ? WHERE member_id = ?", [
 			formData,
@@ -600,14 +607,16 @@ router.get("/member-gu/(:id)", async function (req, res, next) {
 
 router.get("/member-d/(:id)", async function (req, res, next) {
 	try {
-		let id = req.params.id;
+		const member_id = req.params.id;
 
 		const [member_photos_old] = await executeQueryWithParams(
 			"SELECT member_photo FROM member WHERE member_id = ?",
 			[member_id]
 		);
 
-		const [rows] = await executeQueryWithParams("DELETE FROM member WHERE member_id = ?", [id]);
+		const [rows] = await executeQueryWithParams("DELETE FROM member WHERE member_id = ?", [
+			member_id,
+		]);
 
 		const member_photo_old = member_photos_old[0].member_photo.replace(
 			`http://localhost:3000/images/uploads/`,
@@ -619,7 +628,7 @@ router.get("/member-d/(:id)", async function (req, res, next) {
 		}
 
 		req.flash("success", "Data deleted successfully");
-		res.json({ message: `Member with id ${id} deleted successfully` });
+		res.json({ message: `Member with id ${member_id} deleted successfully` });
 	} catch (error) {
 		console.error("Error in /api/member-d route:", error.message);
 		res.status(400).json({ error: error.message });
