@@ -59,6 +59,10 @@ app.use("/product", productRouter);
 app.use("/member", memberRouter);
 app.use("/api", apiRouter);
 
+app.get("/", (req, res) => res.send("Express on Vercel"));
+
+app.listen(3000, () => console.log("Server ready on port 3000."));
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
 	next(createError(404));
