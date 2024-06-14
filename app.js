@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware setup
 app.use(
 	cors({
-		origin: "http://127.0.0.1:5501", // Specify the frontend's origin,
+		origin: "https://xellanix.github.io/xellanix/", // Specify the frontend's origin,
 		credentials: true,
 	})
 ); // Enable CORS for all routes
