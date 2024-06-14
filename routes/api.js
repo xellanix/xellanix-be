@@ -448,7 +448,7 @@ router.post("/member-c", async function (req, res, next) {
 		const ext = path.extname(file.originalname);
 		const filename = file.filename + ext;
 		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
-		fs.rename(
+		/* fs.rename(
 			`./public/images/uploads/${file.filename}`,
 			`./public/images/uploads/${filename}`,
 			function (err) {
@@ -460,7 +460,7 @@ router.post("/member-c", async function (req, res, next) {
 					throw new Error(`fs rename error: ${err.message}`);
 				}
 			}
-		);
+		); */
 		formData.member_photo = url;
 
 		// if no error
@@ -547,16 +547,16 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 				""
 			);
 			// check if the file exists
-			if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
+			/* if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
 				fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
-			}
+			} */
 
 			const file = member_photo;
 			const fileSize = file.size;
 			const ext = path.extname(file.originalname);
 			const filename = file.filename + ext;
 			const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
-			fs.rename(
+			/* fs.rename(
 				`./public/images/uploads/${file.filename}`,
 				`./public/images/uploads/${filename}`,
 				function (err) {
@@ -566,7 +566,7 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 						throw new Error(`fs rename error: ${err.message}`);
 					}
 				}
-			);
+			); */
 			formData.member_photo = url;
 		}
 
@@ -623,9 +623,9 @@ router.get("/member-d/(:id)", async function (req, res, next) {
 			""
 		);
 		// check if the file exists
-		if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
+		/* if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
 			fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
-		}
+		} */
 
 		req.flash("success", "Data deleted successfully");
 		res.json({ message: `Member with id ${member_id} deleted successfully` });
