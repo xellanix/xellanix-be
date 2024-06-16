@@ -1,0 +1,22 @@
+<svg width="225" height="300" viewBox="0 0 225 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+    rect {
+        fill: #F7F7F7;
+    }
+    path {
+        stroke: #303030;
+    }
+    @media (prefers-color-scheme: dark) {
+        rect {
+            fill: #3B3B3B;
+        }
+        path {
+            stroke: #E6E6E6;
+        }
+    }</style>
+<rect width="225" height="300"/>
+<g>
+<path d="M93 125C93 130.304 95.1071 135.391 98.8579 139.142C102.609 142.893 107.696 145 113 145C118.304 145 123.391 142.893 127.142 139.142C130.893 135.391 133 130.304 133 125C133 119.696 130.893 114.609 127.142 110.858C123.391 107.107 118.304 105 113 105C107.696 105 102.609 107.107 98.8579 110.858C95.1071 114.609 93 119.696 93 125Z" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M83 195V185C83 179.696 85.1071 174.609 88.8579 170.858C92.6086 167.107 97.6957 165 103 165H123C128.304 165 133.391 167.107 137.142 170.858C140.893 174.609 143 179.696 143 185V195" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>
