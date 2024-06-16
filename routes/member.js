@@ -12,8 +12,6 @@ const upload = multer({
 let { sql } = require("@vercel/postgres");
 var com = require("../library/com");
 
-const storage = getStorage();
-
 /**
  * INDEX MEMBER
  */
@@ -45,13 +43,6 @@ router.post("/store", upload.single("member_photo"), async function (req, res, n
 	let member_photo = "";
 
 	try {
-		const filename = new Date().getTime() + "-" + file.originalname;
-		const storageRef = ref(storage, "images/uploads/" + filename);
-		const snapshot = await uploadBytes(storageRef, file.buffer);
-		const imageURL = await getDownloadURL(snapshot.ref);
-
-		member_photo = imageURL;
-
 		const { rows } =
 			await sql`SELECT access_id FROM type_access WHERE access_type = ${req.body.access_type};`;
 
