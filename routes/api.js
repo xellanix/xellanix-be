@@ -1,26 +1,26 @@
 var express = require("express");
 var router = express.Router();
-const multer = require("multer");
-//limit filesize to 5 MB
-const upload = multer({ dest: "./public/images/uploads/", limits: { fileSize: 5000000 } });
+var { put, del } = require("@vercel/blob");
 
 //import database
-var { connect, executeQuery, executeQueryWithParams } = require("../library/db");
+var { sql } = require("@vercel/postgres");
 var com = require("../library/com");
 var utils = require("../library/utils");
 var { verifyTokenFn } = require("../middleware/verifyToken");
-var path = require("path");
-var fs = require("fs");
+const { randomUUID } = require("crypto");
 
-const localhost = "http://localhost:3000/";
+function getOrigin(req) {
+	// http://localhost:3000
+	return `${req.protocol}://${req.get("host")}`;
+}
 
 async function getAccessID() {
 	try {
-		const [results, fields] = await executeQuery("SELECT * FROM type_access");
+		const { rows } = await sql`SELECT * FROM type_access;`;
 
-		return results;
+		return rows;
 	} catch (error) {
-		throw new Error("Query error: " + err.message);
+		throw new Error("Query error: " + error.message);
 	}
 }
 
@@ -45,7 +45,7 @@ router.post("/eb82c110-9a34-46a0-9587-db8bf8576014", async function (req, res, n
 		learn_link: prod_url,
 	};
 
-	const resp = await com.talk(res, localhost + "api/product-c", "json", bodyData);
+	const resp = await com.talk(res, getOrigin(req) + "/api/product-c", "json", bodyData);
 	resp && res.json(await resp.json());
 });
 
@@ -54,7 +54,7 @@ router.get("/da24dea7-d4ce-4e31-a531-96d6c466ea38", async function (req, res, ne
 	const verify = verifyTokenFn(req);
 	const access_id = req?.decoded?.access_id || 1;
 
-	const resp = await com.listen(res, localhost + "api/product-r", "json");
+	const resp = await com.listen(res, getOrigin(req) + "/api/product-r", "json");
 	const rjson = await resp?.json();
 
 	const accessID = await getAccessID();
@@ -90,7 +90,7 @@ router.get("/9b6c7e7d-9d7f-4c60-80eb-ac24cef7f264/(:id)", async function (req, r
 
 	const product_id = req.params.id;
 
-	const resp = await com.listen(res, `${localhost}api/product-gu/${product_id}`, "json");
+	const resp = await com.listen(res, `${getOrigin(req)}/api/product-gu/${product_id}`, "json");
 	const rjson = await resp?.json();
 
 	resp && res.json(rjson);
@@ -138,35 +138,31 @@ router.get("/295c6c91-e2b9-4c53-bc27-0b7bdcf3c517/(:id)", async function (req, r
 });
 
 // Create member
-router.post(
-	"/23b9d3e8-ae4d-4420-b136-ea905f7844ed",
-	upload.single("member_img"),
-	async function (req, res, next) {
-		const verify = verifyTokenFn(req);
-		const user_access_id = req?.decoded?.access_id || 1;
-		if (!user_access_id || user_access_id === 1) return;
+router.post("/23b9d3e8-ae4d-4420-b136-ea905f7844ed", async function (req, res, next) {
+	const verify = verifyTokenFn(req);
+	const user_access_id = req?.decoded?.access_id || 1;
+	if (!user_access_id || user_access_id === 1) return;
 
-		const { member_name, member_role } = req.body;
-		const member_img = req.file;
+	const { member_img, member_name, member_role, member_img_ext } = req.body;
 
-		const bodyData = {
-			access_id: 1,
-			member_name: member_name,
-			member_role: member_role,
-			member_photo: member_img,
-		};
+	const bodyData = {
+		access_id: 1,
+		member_name: member_name,
+		member_role: member_role,
+		member_photo: member_img,
+		member_photo_ext: member_img_ext,
+	};
 
-		const resp = await com.talk(res, localhost + "api/member-c", "json", bodyData);
-		resp && res.json(await resp.json());
-	}
-);
+	const resp = await com.talk(res, getOrigin(req) + "/api/member-c", "json", bodyData);
+	resp && res.json(await resp.json());
+});
 
 // Read member
 router.get("/2410fb2e-bd08-4678-be1b-c05ebb13a5c1", async function (req, res, next) {
 	const verify = verifyTokenFn(req);
 	const access_id = req?.decoded?.access_id || 1;
 
-	const resp = await com.listen(res, localhost + "api/member-r", "json");
+	const resp = await com.listen(res, getOrigin(req) + "/api/member-r", "json");
 	const rjson = await resp?.json();
 
 	const accessID = await getAccessID();
@@ -202,47 +198,43 @@ router.get("/9cb41cdb-70fb-4957-984d-d649c39130a1/(:id)", async function (req, r
 
 	const member_id = req.params.id;
 
-	const resp = await com.listen(res, `${localhost}api/member-gu/${member_id}`, "json");
+	const resp = await com.listen(res, `${getOrigin(req)}/api/member-gu/${member_id}`, "json");
 	const rjson = await resp?.json();
 
 	resp && res.json(rjson);
 });
 
 // Update member
-router.post(
-	"/2a4bb58c-3fbd-429a-ad26-ced47bae82a7/(:id)",
-	upload.single("member_img"),
-	async function (req, res, next) {
-		const verify = verifyTokenFn(req);
-		const user_access_id = req?.decoded?.access_id || 1;
-		if (!user_access_id || user_access_id === 1) return;
+router.post("/2a4bb58c-3fbd-429a-ad26-ced47bae82a7/(:id)", async function (req, res, next) {
+	const verify = verifyTokenFn(req);
+	const user_access_id = req?.decoded?.access_id || 1;
+	if (!user_access_id || user_access_id === 1) return;
 
-		let member_id = req.params.id;
-		const { member_name, member_role } = req.body;
-		const member_img = req.file;
+	let member_id = req.params.id;
+	const { member_name, member_role, member_img, member_img_ext } = req.body;
 
-		const formData = member_img
-			? {
-					access_id: 1,
-					member_name: member_name,
-					member_role: member_role,
-					member_photo: member_img,
-			  }
-			: {
-					access_id: 1,
-					member_name: member_name,
-					member_role: member_role,
-			  };
+	const formData = member_img
+		? {
+				access_id: 1,
+				member_name: member_name,
+				member_role: member_role,
+				member_photo: member_img,
+				member_photo_ext: member_img_ext,
+		  }
+		: {
+				access_id: 1,
+				member_name: member_name,
+				member_role: member_role,
+		  };
 
-		const resp = await com.talk(
-			res,
-			`http://localhost:3000/api/member-u/${member_id}`,
-			"json",
-			formData
-		);
-		resp && res.json(await resp.json());
-	}
-);
+	const resp = await com.talk(
+		res,
+		`${getOrigin(req)}/api/member-u/${member_id}`,
+		"json",
+		formData
+	);
+	resp && res.json(await resp.json());
+});
 
 // Delete member
 router.get("/bd7d187c-0fe5-4887-870c-81aa2b6a4152/(:id)", async function (req, res, next) {
@@ -291,8 +283,10 @@ router.post("/product-c", async function (req, res, next) {
 
 		// if no error
 		if (!errors) {
+			const { access_id, description, learn_link } = formData;
 			// insert query
-			await executeQueryWithParams("INSERT INTO product SET ?", formData);
+			const { rows } =
+				await sql`INSERT INTO product (access_id, product_name, description, learn_link) VALUES (${access_id}, ${formData.product_name}, ${description}, ${learn_link});`;
 
 			req.flash("success", "Data saved successfully");
 			res.json({ message: `Product with name ${product_name} created successfully` });
@@ -305,9 +299,8 @@ router.post("/product-c", async function (req, res, next) {
 
 router.get("/product-r", async function (req, res, next) {
 	try {
-		const [rows] = await executeQuery(
-			"SELECT product_id, access_type, product_name, description, learn_link FROM product JOIN type_access ON product.access_id = type_access.access_id ORDER BY type_access.access_id, product_id, product_name"
-		);
+		const { rows } =
+			await sql`SELECT product_id, access_type, product_name, description, learn_link FROM product JOIN type_access ON product.access_id = type_access.access_id ORDER BY type_access.access_id, product_id, product_name;`;
 
 		const items = rows.map((row) => {
 			return {
@@ -329,10 +322,7 @@ router.get("/product-gu/(:id)", async function (req, res, next) {
 	const product_id = req.params.id;
 
 	try {
-		const [rows, fields] = await executeQueryWithParams(
-			"SELECT * FROM product WHERE product_id = ?",
-			[product_id]
-		);
+		const { rows } = await sql`SELECT * FROM product WHERE product_id = ${product_id};`;
 
 		res.json({
 			product_id: rows[0].product_id,
@@ -379,11 +369,9 @@ router.post("/product-u/(:id)", async function (req, res, next) {
 
 		// if no error
 		if (!errors) {
+			const { access_id, description, learn_link } = formData;
 			// insert query
-			await executeQueryWithParams("UPDATE product SET ? WHERE product_id = ?", [
-				formData,
-				product_id,
-			]);
+			await sql`UPDATE product SET access_id = ${access_id}, product_name = ${formData.product_name}, description = ${description}, learn_link = ${learn_link} WHERE product_id = ${product_id};`;
 
 			req.flash("success", "Data updated successfully");
 			res.json({ message: `Product with name ${product_name} updated successfully` });
@@ -397,9 +385,7 @@ router.post("/product-u/(:id)", async function (req, res, next) {
 router.get("/product-d/(:id)", async function (req, res, next) {
 	try {
 		let id = req.params.id;
-		const [rows] = await executeQueryWithParams("DELETE FROM product WHERE product_id = ?", [
-			id,
-		]);
+		await sql`DELETE FROM product WHERE product_id = ${id};`;
 
 		req.flash("success", "Data deleted successfully");
 		res.json({ message: `Product with id ${id} deleted successfully` });
@@ -410,10 +396,7 @@ router.get("/product-d/(:id)", async function (req, res, next) {
 });
 
 router.post("/member-c", async function (req, res, next) {
-	let access_id = req.body.access_id;
-	let member_name = req.body.member_name;
-	let member_role = req.body.member_role;
-	let member_photo = req.body.member_photo;
+	let { access_id, member_name, member_role, member_photo, member_photo_ext } = req.body;
 	let errors = false;
 
 	let formData = {
@@ -422,8 +405,6 @@ router.post("/member-c", async function (req, res, next) {
 		member_role: member_role,
 		member_photo: member_photo,
 	};
-
-	console.log(formData);
 
 	try {
 		if (access_id < 1 || access_id > 3) {
@@ -443,30 +424,24 @@ router.post("/member-c", async function (req, res, next) {
 			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
 		}
 
-		const file = member_photo;
-		const fileSize = file.size;
-		const ext = path.extname(file.originalname);
-		const filename = file.filename + ext;
-		const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
-		/* fs.rename(
-			`./public/images/uploads/${file.filename}`,
-			`./public/images/uploads/${filename}`,
-			function (err) {
-				if (err) {
-					errors = true;
+		const base64Data = member_photo.replace(/^data:image\/\w+;base64,/, "");
+		const buffer = Buffer.from(base64Data, "base64");
 
-					// set flash message
-					req.flash("error", `file rename error: ${err.message}`);
-					throw new Error(`fs rename error: ${err.message}`);
-				}
-			}
-		); */
-		formData.member_photo = url;
+		const filename = randomUUID().replace(/-/g, "") + "." + member_photo_ext;
+		const fullPath = `images/uploads/${filename}`;
+
+		// upload buffer to blob
+		const blob = await put(fullPath, buffer, {
+			access: "public",
+		});
+
+		formData.member_photo = blob.url;
 
 		// if no error
 		if (!errors) {
+			const { access_id, member_role, member_photo } = formData;
 			// insert query
-			await executeQueryWithParams("INSERT INTO member SET ?", formData);
+			await sql`INSERT INTO member (access_id, member_name, member_role, member_photo) VALUES (${access_id}, ${formData.member_name}, ${member_role}, ${member_photo});`;
 
 			req.flash("success", "Data saved successfully");
 			res.json({ message: `Member with name ${member_name} created successfully` });
@@ -479,9 +454,8 @@ router.post("/member-c", async function (req, res, next) {
 
 router.get("/member-r", async function (req, res, next) {
 	try {
-		const [rows] = await executeQuery(
-			"SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name"
-		);
+		const { rows } =
+			await sql`SELECT member_id, access_type, member_name, member_role, member_photo FROM member JOIN type_access ON member.access_id = type_access.access_id ORDER BY type_access.access_id, member_id, member_role, member_name;`;
 
 		const items = rows.map((row) => {
 			const member = {
@@ -502,7 +476,7 @@ router.get("/member-r", async function (req, res, next) {
 
 router.post("/member-u/(:id)", async function (req, res, next) {
 	let member_id = req.params.id;
-	let { access_id, member_name, member_role, member_photo } = req.body;
+	let { access_id, member_name, member_role, member_photo, member_photo_ext } = req.body;
 
 	let formData = member_photo
 		? {
@@ -538,42 +512,28 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 		}
 
 		if (member_photo) {
-			const [member_photos_old] = await executeQueryWithParams(
-				"SELECT member_photo FROM member WHERE member_id = ?",
-				[member_id]
-			);
-			const member_photo_old = member_photos_old[0].member_photo.replace(
-				`http://localhost:3000/images/uploads/`,
-				""
-			);
-			// check if the file exists
-			/* if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
-				fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
-			} */
+			const base64Data = member_photo.replace(/^data:image\/\w+;base64,/, "");
+			const buffer = Buffer.from(base64Data, "base64");
 
-			const file = member_photo;
-			const fileSize = file.size;
-			const ext = path.extname(file.originalname);
-			const filename = file.filename + ext;
-			const url = `${req.protocol}://${req.get("host")}/images/uploads/${filename}`;
-			/* fs.rename(
-				`./public/images/uploads/${file.filename}`,
-				`./public/images/uploads/${filename}`,
-				function (err) {
-					if (err) {
-						errors = true;
-						req.flash("error", `file rename error: ${err.message}`);
-						throw new Error(`fs rename error: ${err.message}`);
-					}
-				}
-			); */
-			formData.member_photo = url;
+			const filename = randomUUID().replace(/-/g, "") + "." + member_photo_ext;
+			const fullPath = `images/uploads/${filename}`;
+
+			let member_photo_old = (
+				await sql`SELECT member_photo FROM member WHERE member_id = ${member_id};`
+			)?.rows[0]?.member_photo;
+
+			// upload buffer to blob
+			const blob = await put(fullPath, buffer, {
+				access: "public",
+			});
+
+			formData.member_photo = blob.url;
+
+			// delete the blob
+			member_photo_old && (await del(member_photo_old));
 		}
 
-		await executeQueryWithParams("UPDATE member SET ? WHERE member_id = ?", [
-			formData,
-			member_id,
-		]);
+		await sql`UPDATE member SET access_id = ${formData.access_id}, member_name = ${formData.member_name}, member_role = ${formData.member_role}, member_photo = ${formData.member_photo} WHERE member_id = ${member_id};`;
 
 		req.flash("success", "Data updated successfully");
 		res.json({ message: `Member with name ${member_name} updated successfully` });
@@ -587,10 +547,7 @@ router.get("/member-gu/(:id)", async function (req, res, next) {
 	const member_id = req.params.id;
 
 	try {
-		const [rows, fields] = await executeQueryWithParams(
-			"SELECT * FROM member WHERE member_id = ?",
-			[member_id]
-		);
+		const { rows } = await sql`SELECT * FROM member WHERE member_id = ${member_id};`;
 
 		res.json({
 			member_id: rows[0].member_id,
@@ -609,23 +566,14 @@ router.get("/member-d/(:id)", async function (req, res, next) {
 	try {
 		const member_id = req.params.id;
 
-		const [member_photos_old] = await executeQueryWithParams(
-			"SELECT member_photo FROM member WHERE member_id = ?",
-			[member_id]
-		);
+		let member_photo_old = (
+			await sql`SELECT member_photo FROM member WHERE member_id = ${member_id};`
+		)?.rows[0]?.member_photo;
 
-		const [rows] = await executeQueryWithParams("DELETE FROM member WHERE member_id = ?", [
-			member_id,
-		]);
+		const { rows } = await sql`DELETE FROM member WHERE member_id = ${member_id};`;
 
-		const member_photo_old = member_photos_old[0].member_photo.replace(
-			`http://localhost:3000/images/uploads/`,
-			""
-		);
-		// check if the file exists
-		/* if (fs.existsSync(`./public/images/uploads/${member_photo_old}`)) {
-			fs.unlinkSync(`./public/images/uploads/${member_photo_old}`);
-		} */
+		// delete the blob
+		member_photo_old && (await del(member_photo_old));
 
 		req.flash("success", "Data deleted successfully");
 		res.json({ message: `Member with id ${member_id} deleted successfully` });

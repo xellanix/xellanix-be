@@ -63,7 +63,7 @@ let listen = async function (res, url = "http://localhost:3000/api/", type = "js
 		return response.status < 400 && response;
 	} catch (error) {
 		console.error("Error:", error.message);
-		res.status(500).send("Internal Server Error");
+		res.status(500).send("Internal Server Error 2");
 	}
 };
 

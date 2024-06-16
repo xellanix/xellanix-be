@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware setup
 app.use(
 	cors({
-		origin: "https://xellanix.github.io/xellanix/", // Specify the frontend's origin,
+		origin: "http://127.0.0.1:3000", // Specify the frontend's origin,
 		credentials: true,
 	})
 ); // Enable CORS for all routes
@@ -59,12 +59,9 @@ app.use("/product", productRouter);
 app.use("/member", memberRouter);
 app.use("/api", apiRouter);
 
-app.get("/", (req, res) => res.send("Express on Vercel"));
-
-app.listen(3000, () => console.log("Server ready on port 3000."));
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
+	console.log("404: " + req.url);
 	next(createError(404));
 });
 
@@ -76,6 +73,7 @@ app.use(function (err, req, res, next) {
 
 	// render the error page
 	res.status(err.status || 500);
+	console.log(err);
 	res.render("error");
 });
 

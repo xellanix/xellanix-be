@@ -25,3 +25,4 @@ dist-ssr
 .env*
 *.db
 public/images/uploads/
+.vercel

@@ -3,6 +3,7 @@ var router = express.Router();
 
 //import database
 var { connect, executeQueryWithParams } = require("../library/db");
+let { sql } = require("@vercel/postgres");
 var com = require("../library/com");
 
 /**
@@ -10,7 +11,11 @@ var com = require("../library/com");
  */
 router.get("/", async function (req, res, next) {
 	//query
-	const resp = await com.listen(res, "http://localhost:3000/api/product-r", "json");
+	const resp = await com.listen(
+		res,
+		`${req.protocol}://${req.get("host")}/api/product-r`,
+		"json"
+	);
 	const rjson = await resp?.json();
 	let filteredResp = rjson?.filter((item) => {
 		return item?.access_type === "user";
@@ -34,24 +39,30 @@ router.get("/create", function (req, res, next) {
  * STORE POST
  */
 router.post("/store", async function (req, res, next) {
+	let access_id = 1;
+	let { product_name, description, learn_link } = req.body;
+
 	try {
-		const [rows, fields] = await executeQueryWithParams(
-			"SELECT access_id FROM type_access WHERE access_type = ?",
-			[req.body.access_type]
+		const { rows } =
+			await sql`SELECT access_id FROM type_access WHERE access_type = ${req.body.access_type};`;
+
+		access_id = rows[0].access_id;
+
+		const resp = await com.talk(
+			res,
+			`${req.protocol}://${req.get("host")}/api/product-c`,
+			"json",
+			{
+				access_id: access_id,
+				product_name: product_name,
+				description: description,
+				learn_link: learn_link,
+			}
 		);
 
-		let { product_name, description, learn_link } = req.body;
-
-		const resp = await com.talk(res, "http://localhost:3000/api/product-c", "json", {
-			access_id: rows[0].access_id,
-			product_name: product_name,
-			description: description,
-			learn_link: learn_link,
-		});
-
-		resp ? res.redirect("/product") : res.render("product/create", formData);
+		resp ? res.redirect(302, "/product") : res.render("product/create", formData);
 	} catch (error) {
-		req.flash("error", err);
+		req.flash("error", error);
 		res.render("product/create", {
 			access_id: access_id,
 			product_name: product_name,
@@ -66,7 +77,7 @@ router.get("/edit/(:id)", async function (req, res, next) {
 	let product_id = req.params.id;
 	const resp = await com.listen(
 		res,
-		`http://localhost:3000/api/product-gu/${product_id}`,
+		`${req.protocol}://${req.get("host")}/api/product-gu/${product_id}`,
 		"json"
 	);
 
@@ -89,17 +100,18 @@ router.get("/edit/(:id)", async function (req, res, next) {
  * UPDATE POST
  */
 router.post("/update/(:id)", async function (req, res, next) {
-	try {
-		let product_id = req.params.id;
-		let { access_type, product_name, description, learn_link } = req.body;
+	let product_id = req.params.id;
+	let { access_type, product_name, description, learn_link } = req.body;
+	let access_id = 1;
 
-		const [access_id] = await executeQueryWithParams(
-			"SELECT access_id FROM type_access WHERE access_type = ?",
-			[access_type]
-		);
+	try {
+		const { rows } =
+			await sql`SELECT access_id FROM type_access WHERE access_type = ${access_type};`;
+
+		access_id = rows[0].access_id;
 
 		const formData = {
-			access_id: access_id[0].access_id,
+			access_id: access_id,
 			product_name: product_name,
 			description: description,
 			learn_link: learn_link,
@@ -107,16 +119,16 @@ router.post("/update/(:id)", async function (req, res, next) {
 
 		const resp = await com.talk(
 			res,
-			`http://localhost:3000/api/product-u/${product_id}`,
+			`${req.protocol}://${req.get("host")}/api/product-u/${product_id}`,
 			"json",
 			formData
 		);
-		resp ? res.redirect("/product") : res.render("product/update/(:id)", formData);
+		resp ? res.redirect(302, "/product") : res.render("product/update/(:id)", formData);
 	} catch (err) {
 		req.flash("error", err.message);
 		res.render("product/edit", {
 			product_id: product_id,
-			access_id: access_id[0].access_id,
+			access_id: access_id,
 			product_name: product_name,
 			description: description,
 			learn_link: learn_link,
@@ -127,7 +139,11 @@ router.post("/update/(:id)", async function (req, res, next) {
 router.get("/delete/(:id)", async function (req, res, next) {
 	let id = req.params.id;
 
-	const resp = await com.listen(res, `http://localhost:3000/api/product-d/${id}`, "json");
+	const resp = await com.listen(
+		res,
+		`${req.protocol}://${req.get("host")}/api/product-d/${id}`,
+		"json"
+	);
 	const rjson = await resp?.json();
 	console.log(rjson);
 	res.redirect("/product");

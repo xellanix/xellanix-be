@@ -1,4 +1,4 @@
-var Users = require("../models/userModel");
+var { sql } = require("@vercel/postgres");
 var jwt = require("jsonwebtoken");
 var com = require("../library/com");
 var jwt_decode = require("jwt-decode");
@@ -7,11 +7,12 @@ const refreshToken = async (req, res) => {
 	try {
 		const refreshToken = com.getToken(req);
 		if (!refreshToken) return res.sendStatus(401);
-		const user = await Users.findAll({
+		/* const user = await Users.findAll({
 			where: {
 				refresh_token: refreshToken,
 			},
-		});
+		}); */
+		const user = (await sql`SELECT * FROM "user" WHERE refresh_token = ${refreshToken};`).rows;
 		if (!user[0]) return res.sendStatus(403);
 		jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
 			if (err) return res.sendStatus(403);

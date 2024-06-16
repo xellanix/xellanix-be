@@ -1,4 +1,4 @@
-var Users = require("../models/userModel");
+var { sql } = require("@vercel/postgres");
 var bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
 var dotenv = require("dotenv");
@@ -6,9 +6,10 @@ var com = require("../library/com");
 
 const getUsers = async (req, res) => {
 	try {
-		const users = await Users.findAll({
+		/* const users = await Users.findAll({
 			attributes: ["user_id", "username", "email"],
-		});
+		}); */
+		const users = (await sql`SELECT * FROM "user";`).rows;
 		res.json(users);
 	} catch (error) {
 		console.log(error);
@@ -23,13 +24,14 @@ const signup = async (req, res) => {
 	console.log({ salt, password });
 	const hashPassword = await bcrypt.hash(password, salt);
 	try {
-		await Users.create({
+		/* await Users.create({
 			username: name,
 			email: email,
 			password: hashPassword,
 			user_photo: "",
 			access_id: 1,
-		});
+		}); */
+		await sql`INSERT INTO "user" (username, email, password, user_photo, access_id, createdAt, updatedAt) VALUES (${name}, ${email}, ${hashPassword}, ${""}, ${1}, ${new Date()}, ${new Date()});`;
 		res.json({ message: "Sign up successfully" });
 	} catch (error) {
 		console.log(error);
@@ -38,13 +40,12 @@ const signup = async (req, res) => {
 
 const signin = async (req, res) => {
 	try {
-		const user = await Users.findAll({
-			where: {
-				email: req.body.email,
-			},
-		});
+		const user = (await sql`SELECT * FROM "user" WHERE email = ${req.body.email};`).rows;
 		const match = await bcrypt.compare(req.body.password, user[0].password);
-		if (!match) return res.status(400).json({ message: "Wrong password" });
+		if (!match) {
+			console.log("Wrong password");
+			return res.status(400).json({ message: "Wrong password" });
+		}
 		const userId = user[0].user_id;
 		const name = user[0].username;
 		const email = user[0].email;
@@ -63,14 +64,7 @@ const signin = async (req, res) => {
 				expiresIn: "1d",
 			}
 		);
-		await Users.update(
-			{ refresh_token: refreshToken },
-			{
-				where: {
-					user_id: userId,
-				},
-			}
-		);
+		await sql`UPDATE "user" SET refresh_token = ${refreshToken} WHERE user_id = ${userId};`;
 		res.cookie("refreshToken", refreshToken, {
 			httpOnly: true,
 			secure: false,
@@ -85,23 +79,13 @@ const signin = async (req, res) => {
 };
 
 const signout = async (req, res) => {
+	console.log("checkpoint 1");
 	const refreshToken = com.getToken(req);
 	if (!refreshToken) return res.sendStatus(204);
-	const user = await Users.findAll({
-		where: {
-			refresh_token: refreshToken,
-		},
-	});
+	const user = (await sql`SELECT * FROM "user" WHERE refresh_token = ${refreshToken};`).rows;
 	if (!user[0]) return res.sendStatus(204);
 	const userId = user[0].user_id;
-	await Users.update(
-		{ refresh_token: null },
-		{
-			where: {
-				user_id: userId,
-			},
-		}
-	);
+	await sql`UPDATE "user" SET refresh_token = ${null} WHERE user_id = ${userId};`;
 	res.clearCookie("refreshToken");
 	return res.sendStatus(200);
 };

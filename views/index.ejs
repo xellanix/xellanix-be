@@ -1,11 +1,218 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Xellanix Community</title>
+
+    <link rel="icon" type="image/svg+xml" href="/xellanix/assets/icon.svg">
+
+    <link rel="stylesheet" href="/xellanix/styles/main-frame.css" >
+    <link rel="stylesheet" href="/xellanix/styles/header-section.css" >
+    <link rel="stylesheet" href="/xellanix/styles/nav-styles.css" >
+    <link rel="stylesheet" href="/xellanix/styles/flex-align.css">
+    <link rel="stylesheet" href="/xellanix/styles/text-align.css">
+    <link rel="stylesheet" href="/xellanix/styles/popup.css">
+    <link rel="stylesheet" href="/xellanix/styles/info-box.css">
+    <link rel="stylesheet" href="/xellanix/styles/button.css">
+    <link rel="stylesheet" href="/xellanix/styles/styles.css" >
+    <link rel="stylesheet" href="/xellanix/styles/media-styles.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.1.0/dist/tabler-icons.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://unpkg.com/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-interactivity@latest/dist/lottie-interactivity.min.js"></script>
+</head>
+<body class="light-theme">
+    <div class="body-wrapper">
+        <div id="header-stick-watcher" data-scroll-watcher></div>
+        <header>
+            <div class="icon-landscape">
+                <a href="" tabindex="-1">
+                    <img src="/xellanix/assets/icon.svg" alt="Xellanix Icon">
+                    <div>Xellanix</div>
+                </a>
+            </div>
+            <nav></nav>
+            <button class="button accent" type="button" id="reqAuthBtn">Sign in</button>
+            <div class="hamburger-button" id="navigation-small-hamburger">
+                <lottie-player id="hamburger-button-lottie" src="/xellanix/assets/hamburger.json" style="width: 40px; height: 40px;" disableShadowDOM></lottie-player>
+            </div>
+        </header>
+        
+        <main>
+            
+            <section class="horizontal-layout use-space-between" id="home-section" data-insert-to-navbar-menu data-affect-to-navbar-menu="home-section">
+                <div id="hero-content">
+                    <h1>Provide <span style="color: var(--accent-color);">Speed, Simplicity, and Neatness</span> in Your Coding Experience</h1>
+                    <h6>Build your programming projects faster and easier than ever.</h6>
+                    <img src="/xellanix/assets/home-1.png" alt="Fast, Simple, and Neat Coding Package Illustration">
+                    <div class="button accent" id="get-started-button">
+                        <a href="#products-section" tabindex="-1">Get Started</a>
+                    </div>
+                </div>
+                <img src="/xellanix/assets/home-1.png" alt="Fast, Simple, and Neat Coding Package Illustration">
+            </section>
+
+            <section class="horizontal-layout" id="more-about-xellanix" data-affect-to-navbar-menu="home-section">
+                <div class="vertical-layout flex-fill text-align-justify" style="flex: 4 1 0;">
+                    <h2>About Xellanix Community</h2>
+                    <p>Xellanix Community (2022) is an independent public benefit community with the purpose to provide a complete, free and open source projects and libraries.<br>We are also established to have a positive impact on many people, especially programmers, in utilizing a programming language for their projects.<br>Xellanix continues to strive for relevance in its active projects and libraries, aiming to provide ongoing convenient and positive feedback regarding our development.</p>
+                </div>
+                <div class="vertical-layout text-align-justify flex-fill vertical-gap2x" style="flex: 6 1 0;">
+                    <div class="vertical-layout flex-fill">
+                        <h2>Community Purposes</h2>
+                        <p>Our Vision is to provide convenience to everyone in working on their projects in specific programming languages for free.<br>As part of our vision, the Xellanix Community was formed with mission to offer relevant and user-friendly projects and libraries for free.</p>
+                    </div>
+                    <div class="vertical-layout flex-fill">
+                        <h2>Our Goals</h2>
+                        <p>Maintain and enhance Xellanix projects and libraries through a publicly accessible source code system under the MIT License.<br>Provide researchers and programmers, both individuals and teams, access to complete, free and open source projects and libraries</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="vertical-layout text-align-center flex-align-center" id="products-section" data-insert-to-navbar-menu data-affect-to-navbar-menu="products-section">
+                <img src="/xellanix/assets/bg-custom-shape-1.svg" alt="">
+                <h2>Explore All the Works You've Never Imagined Before</h2>
+                <div id="products-container" class="horizontal-container-layout flex-align-center">
+                    <div class="product-item">
+                        <h3>MasterTools</h3>
+                        <p>An application with a set of unique and creative features, made with intention and love.</p>
+                        <div class="button accent">
+                            <a href="https://github.com/xellanix/mastertools" target="_blank" tabindex="-1">Learn More</a>
+                        </div>
+                    </div>
+                    <div class="product-item">
+                        <h3>Image Merger</h3>
+                        <p>Merge multiple images from files or clipboard, including screenshots, into a new file.</p>
+                        <div class="button accent">
+                            <a href="https://github.com/xellanix/imagemerger" target="_blank" tabindex="-1">Learn More</a>
+                        </div>
+                    </div>
+                    <div class="product-item">
+                        <h3>Xellanix Library</h3>
+                        <p>A C++ library for regular use, made by xellanix (currently in under development).</p>
+                        <div class="button accent">
+                            <a href="https://github.com/xellanix/xellanix-lib" target="_blank" tabindex="-1">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="vertical-layout text-align-center flex-align-center" id="team-section" data-insert-to-navbar-menu data-affect-to-navbar-menu="team-section">
+                <h2>You Are the One Who Builds This Community</h2>
+                <p>“We build this community with you, as by doing so,<br>there is great hope for ongoing growth.”</p>
+                <div id="members-container" class="horizontal-container-layout flex-align-center">
+                    <div class="team-member-item">
+                        <img src="/xellanix/assets/member/donny.jpg" alt="Donny Andrian Picture">
+                        <div class="vertical-layout">
+                            <h3>Donny Andrian</h3>
+                            <p>President of Xellanix</p>
+                        </div>
+                    </div>
+                    <div class="team-member-item">
+                        <img src="/xellanix/assets/member/jenie.jpg" alt="Jenie Josphin Picture">
+                        <div class="vertical-layout">
+                            <h3>Jenie Josphin</h3>
+                            <p>Creative Director</p>
+                        </div>
+                    </div>
+                    <div class="team-member-item">
+                        <img src="/xellanix/assets/member/bernardo.jpg" alt="Bernardo Ng Picture">
+                        <div class="vertical-layout">
+                            <h3>Bernardo Ng</h3>
+                            <p>Full Stack Developer</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="horizontal-layout use-space-between" id="service-section" data-insert-to-navbar-menu data-affect-to-navbar-menu="service-section">
+                <div class="vertical-layout" style="gap: calc(var(--section-gap-vertical) * 0.75);">
+                    <h2 style="color: var(--accent-color);">Xellanix</h2>
+                    <h4 style="font-weight: 500;">Faster and easier than ever.</h4>
+                    <div class="horizontal-layout social-media-links">
+                        <a href="https://github.com/xellanix" target="_blank"><svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1.75"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-brand-github"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" /></svg></a>
+                    </div>
+                </div>
+                <div class="horizontal-layout gap-15">
+                    <div class="vertical-layout">
+                        <h4>Link</h4>
+                        <a href="#home-section" target="_blank">Home</a>
+                        <a href="#products-section" target="_blank">Products</a>
+                        <a href="#team-section" target="_blank">Team</a>
+                        <a href="#service-section" target="_blank">Services</a>
+                    </div>
+                    <div class="vertical-layout">
+                        <h4>Product</h4>
+                        <a href="https://github.com/xellanix/mastertools" target="_blank">MasterTools</a>
+                        <a href="https://github.com/xellanix/imagemerger" target="_blank">Image Merger</a>
+                        <a href="https://github.com/xellanix/xellanix-lib" target="_blank">Xellanix Library</a>
+                    </div>
+                    <div class="vertical-layout">
+                        <h4>Contact</h4>
+                        <a href="mailto:donnylabsofficial@gmail.com" target="_blank">donnylabsofficial@gmail.com</a>
+                        <div style="font-size: var(--navigation-text-size);">
+                            Kubu Raya, Kalimantan Barat, Indonesia
+                        </div>
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.8159577532433!2d109.36706317495248!3d-0.06235269993703156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e1d59cfb8c87e51%3A0x26f30b0e019e9996!2sService%20Mesin%20Jahit%20Achiung!5e0!3m2!1sen!2sid!4v1712993547014!5m2!1sen!2sid"
+                            width="300"
+                            height="175"
+                            style="border: 0; border-radius: 8px; box-shadow: 0px 4px 48px 0px rgba(0, 0, 0, .1);"
+                            allowFullScreen=""
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="smoke-layer" class="vertical-layout flex-align-middle flex-align-center">
+            <div id="popup" class="popup vertical-layout">
+                <div class="horizontal-layout">
+                    <div class="icon-landscape">
+                        <img src="/xellanix/assets/icon.svg" alt="Xellanix Icon" />
+                        <div>Xellanix</div>
+                    </div>
+                    <button id="popup-close-button" class="default-close-button vertical-layout flex-align-middle flex-align-center">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2.5"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <div id="popup-container">
+                    <div id="popup-content" class="vertical-layout flex-align-center popup-content">
+                        
+                    </div>
+                </div>
+		    </div>
+        </div>
+    </div>
+
+    <script src="/xellanix/scripts/main-app.js"></script>
+    <script src="/xellanix/scripts/builder.js"></script>
+    <script src="/xellanix/scripts/header-effects.js"></script>
+    <script src="/xellanix/scripts/infobox.js"></script>
+    <script src="/xellanix/scripts/input-field.js"></script>
+    <script src="/xellanix/scripts/loader.js"></script>
+    <script src="/xellanix/scripts/popups/product.js"></script>
+    <script src="/xellanix/scripts/popups/member.js"></script>
+    <script src="/xellanix/scripts/popups/authentication.js"></script>
+    <script src="/xellanix/scripts/popup.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script>
+        LottieInteractivity.create({
+            player: '#hamburger-button-lottie',
+            mode: 'cursor',
+            actions: [{type: "toggle"}]
+        });
+    </script>
+</body>
 </html>

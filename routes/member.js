@@ -1,12 +1,18 @@
 var express = require("express");
 var router = express.Router();
+
 const multer = require("multer");
 // limit filesize to 5 MB
-const upload = multer({ dest: "./public/images/uploads/", limits: { fileSize: 5000000 } });
+const upload = multer({
+	dest: "./public/images/uploads/",
+	storage: multer.memoryStorage(),
+});
 
 //import database
-var { connect, executeQueryWithParams } = require("../library/db");
+let { sql } = require("@vercel/postgres");
 var com = require("../library/com");
+
+const storage = getStorage();
 
 /**
  * INDEX MEMBER
@@ -31,17 +37,28 @@ router.get("/create", function (req, res, next) {
 });
 
 router.post("/store", upload.single("member_photo"), async function (req, res, next) {
-	try {
-		const [rows, fields] = await executeQueryWithParams(
-			"SELECT access_id FROM type_access WHERE access_type = ?",
-			[req.body.access_type]
-		);
+	let access_id = 1;
+	let { member_name, member_role } = req.body;
+	console.log(req.body);
+	let file = req.file;
+	/* let member_photo = req.file; */
+	let member_photo = "";
 
-		let { member_name, member_role } = req.body;
-		let member_photo = req.file;
+	try {
+		const filename = new Date().getTime() + "-" + file.originalname;
+		const storageRef = ref(storage, "images/uploads/" + filename);
+		const snapshot = await uploadBytes(storageRef, file.buffer);
+		const imageURL = await getDownloadURL(snapshot.ref);
+
+		member_photo = imageURL;
+
+		const { rows } =
+			await sql`SELECT access_id FROM type_access WHERE access_type = ${req.body.access_type};`;
+
+		access_id = rows[0].access_id;
 
 		const formData = {
-			access_id: rows[0].access_id,
+			access_id: access_id,
 			member_name: member_name,
 			member_role: member_role,
 			member_photo: member_photo,
@@ -49,10 +66,10 @@ router.post("/store", upload.single("member_photo"), async function (req, res, n
 
 		console.log(formData);
 
-		const resp = await com.talk(res, "http://localhost:3000/api/member-c", "json", formData);
-		resp ? res.redirect("/member") : res.render("member/create", formData);
+		/* const resp = await com.talk(res, "http://localhost:3000/api/member-c", "json", formData);
+		resp ? res.redirect(302, "/member") : res.render("member/create", formData); */
 	} catch (error) {
-		req.flash("error", err);
+		req.flash("error", error);
 		res.render("member/create", {
 			access_id: access_id,
 			member_name: member_name,
@@ -87,18 +104,18 @@ router.get("/edit/(:id)", async function (req, res, next) {
  * UPDATE POST
  */
 router.post("/update/(:id)", upload.single("member_photo"), async function (req, res, next) {
-	try {
-		let member_id = req.params.id;
-		let { access_type, member_name, member_role } = req.body;
-		let member_photo = req.file;
+	let access_id = 1;
+	let member_id = req.params.id;
+	let { access_type, member_name, member_role } = req.body;
+	let member_photo = req.file;
 
-		const [access_id] = await executeQueryWithParams(
-			"SELECT access_id FROM type_access WHERE access_type = ?",
-			[access_type]
-		);
+	try {
+		const { rows } =
+			await sql`SELECT access_id FROM type_access WHERE access_type = ${access_type};`;
+		access_id = rows[0].access_id;
 
 		const formData = {
-			access_id: access_id[0].access_id,
+			access_id: access_id,
 			member_name: member_name,
 			member_role: member_role,
 			member_photo: member_photo,
@@ -110,13 +127,13 @@ router.post("/update/(:id)", upload.single("member_photo"), async function (req,
 			"json",
 			formData
 		);
-		resp ? res.redirect("/member") : res.render("member/update/(:id)", formData);
+		resp ? res.redirect(302, "/member") : res.render("member/update/(:id)", formData);
 	} catch (err) {
 		console.error(err);
 		req.flash("error", err.message);
 		res.render("member/edit", {
 			member_id: member_id,
-			access_id: access_id[0].access_id,
+			access_id: access_id,
 			member_name: member_name,
 			member_role: member_role,
 			member_photo: member_photo,
