@@ -115,7 +115,7 @@ async function onMemberUpdatedSubmit(event) {
 			submitBtn.text("Member Updated");
 
 			await delay(2000);
-			//location.reload();
+			location.reload();
 		},
 		error: function (xhr, status, error) {
 			// Handle error
