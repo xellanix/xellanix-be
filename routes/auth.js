@@ -8,7 +8,7 @@ router.post("/", signin);
 router.get("/signup", verifyToken, getUsers); //fungsi getUsers dibatasi oleh verifyToken sehingga user perlu login untuk dapat melihat
 router.post("/signup", signup);
 router.get("/token", refreshToken);
-router.delete("/signout", signout);
+router.get("/signout", signout);
 /* GET users listing. */
 /* router.get('/', function(req, res, next) {
   res.send('respond with a resource');

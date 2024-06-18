@@ -59,6 +59,12 @@ app.use("/product", productRouter);
 app.use("/member", memberRouter);
 app.use("/api", apiRouter);
 
+app.use((req, res, next) => {
+	console.log("Incoming Request:", req.method, req.url);
+	console.log("Cookies:", req.cookies);
+	next();
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
 	console.log("404: " + req.url);
@@ -72,8 +78,8 @@ app.use(function (err, req, res, next) {
 	res.locals.error = req.app.get("env") === "development" ? err : {};
 
 	// render the error page
-	res.status(err.status || 500);
 	console.log(err);
+	res.status(err.status || 500);
 	res.render("error");
 });
 

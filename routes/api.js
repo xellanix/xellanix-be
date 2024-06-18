@@ -213,19 +213,15 @@ router.post("/2a4bb58c-3fbd-429a-ad26-ced47bae82a7/(:id)", async function (req, 
 	let member_id = req.params.id;
 	const { member_name, member_role, member_img, member_img_ext } = req.body;
 
-	const formData = member_img
-		? {
-				access_id: 1,
-				member_name: member_name,
-				member_role: member_role,
-				member_photo: member_img,
-				member_photo_ext: member_img_ext,
-		  }
-		: {
-				access_id: 1,
-				member_name: member_name,
-				member_role: member_role,
-		  };
+	const formData = {
+		access_id: 1,
+		member_name: member_name,
+		member_role: member_role,
+		...(!utils.isNullOrEmpty(member_img) && {
+			member_photo: member_img,
+			member_photo_ext: member_img_ext,
+		}),
+	};
 
 	const resp = await com.talk(
 		res,
@@ -478,18 +474,11 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 	let member_id = req.params.id;
 	let { access_id, member_name, member_role, member_photo, member_photo_ext } = req.body;
 
-	let formData = member_photo
-		? {
-				access_id: access_id,
-				member_name: member_name,
-				member_role: member_role,
-				member_photo: member_photo,
-		  }
-		: {
-				access_id: access_id,
-				member_name: member_name,
-				member_role: member_role,
-		  };
+	let formData = {
+		access_id: access_id,
+		member_name: member_name,
+		member_role: member_role,
+	};
 
 	try {
 		if (access_id < 1 || access_id > 3) {
@@ -500,9 +489,12 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			throw new Error("Missing required fields: access_id");
 		}
 
-		const isNullEntries = utils.isNullEntries(
-			member_photo ? { member_name, member_role, member_photo } : { member_name, member_role }
-		);
+		const photoUpdated = !utils.isNullOrEmpty(member_photo_ext);
+		const isNullEntries = utils.isNullEntries({
+			member_name,
+			member_role,
+			...(photoUpdated && { member_photo }),
+		});
 		if (isNullEntries) {
 			errors = true;
 
@@ -511,7 +503,7 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			throw new Error(`Missing required fields: ${isNullEntries.entry}`);
 		}
 
-		if (member_photo) {
+		if (photoUpdated) {
 			const base64Data = member_photo.replace(/^data:image\/\w+;base64,/, "");
 			const buffer = Buffer.from(base64Data, "base64");
 

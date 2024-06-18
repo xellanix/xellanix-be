@@ -18,7 +18,7 @@ const verifyTokenFn = (req) => {
 		if (token == null) throw new Error("No token provided");
 
 		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-			if (err) throw new Error(`Invalid token: ${err.expiredAt}`);
+			if (err) throw new Error(`Invalid token: ${err.expiredAt} | ${new Date()}`);
 			req.decoded = decoded;
 		});
 

@@ -33,6 +33,6 @@ let isNullEntries = function (entries) {
 	}
 };
 
-let utils = { isNullEntries };
+let utils = { isNullEntries, isNullOrEmpty };
 
 module.exports = utils;

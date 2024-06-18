@@ -199,8 +199,9 @@ function signOutUser() {
 			Authorization: `Bearer ${refreshToken}`,
 		},
 		{
-			type: "DELETE",
-			url: `${basePath}/auth/signout/`,
+			type: "GET",
+			url: `${basePath}/auth/signout`,
+			contentType: "application/json",
 			success: async function (data) {
 				console.log("Signed out successfully: " + data.message);
 

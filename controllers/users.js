@@ -79,7 +79,6 @@ const signin = async (req, res) => {
 };
 
 const signout = async (req, res) => {
-	console.log("checkpoint 1");
 	const refreshToken = com.getToken(req);
 	if (!refreshToken) return res.sendStatus(204);
 	const user = (await sql`SELECT * FROM "user" WHERE refresh_token = ${refreshToken};`).rows;
