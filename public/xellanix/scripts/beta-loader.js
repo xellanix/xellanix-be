@@ -44,7 +44,7 @@ function fetchProducts() {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 			$("#new-product-error-wrapper").append(infoBox("error", errorMessage));
@@ -96,7 +96,7 @@ function fetchMembers() {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 			$("#new-product-error-wrapper").append(infoBox("error", errorMessage));

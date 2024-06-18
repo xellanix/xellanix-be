@@ -54,7 +54,7 @@ async function onMemberSubmit(event) {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 			$("#new-member-error-wrapper").find("*").off();
@@ -113,7 +113,7 @@ async function onMemberUpdatedSubmit(event) {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 			$("#update-member-error-wrapper").find("*").off();
@@ -168,7 +168,7 @@ $(document).on("deleteMemberPopupLoaded", function (event, element) {
 			error: function (xhr, status, error) {
 				// Handle error
 				let errorCode = xhr.status;
-				let errorText = xhr.statusText;
+				let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 				let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 				$("#delete-member-error-wrapper").find("*").off();
@@ -212,7 +212,7 @@ $("#members-container").on("click", ".member-edit", async function (event) {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `Error ${errorCode}: ${errorText}`;
 
 			alert(errorMessage);

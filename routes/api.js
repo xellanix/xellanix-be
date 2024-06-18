@@ -114,7 +114,7 @@ router.post("/b137a6ba-db3d-4a82-a5c5-d0b33cd2cbf9/(:id)", async function (req, 
 
 	const resp = await com.talk(
 		res,
-		`http://localhost:3000/api/product-u/${product_id}`,
+		`${getOrigin(req)}/api/product-u/${product_id}`,
 		"json",
 		formData
 	);
@@ -130,7 +130,7 @@ router.get("/295c6c91-e2b9-4c53-bc27-0b7bdcf3c517/(:id)", async function (req, r
 	if (!user_access_id || user_access_id === 1) return;
 
 	const product_id = req.params.id;
-	const resp = await com.listen(res, `http://localhost:3000/api/product-d/${product_id}`, "json");
+	const resp = await com.listen(res, `${getOrigin(req)}/api/product-d/${product_id}`, "json");
 
 	const rjson = await resp?.json();
 
@@ -239,7 +239,7 @@ router.get("/bd7d187c-0fe5-4887-870c-81aa2b6a4152/(:id)", async function (req, r
 	if (!user_access_id || user_access_id === 1) return;
 
 	const member_id = req.params.id;
-	const resp = await com.listen(res, `http://localhost:3000/api/member-d/${member_id}`, "json");
+	const resp = await com.listen(res, `${getOrigin(req)}/api/member-d/${member_id}`, "json");
 	const rjson = await resp?.json();
 
 	resp && res.json(rjson);
@@ -525,7 +525,11 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			member_photo_old && (await del(member_photo_old));
 		}
 
-		await sql`UPDATE member SET access_id = ${formData.access_id}, member_name = ${formData.member_name}, member_role = ${formData.member_role}, member_photo = ${formData.member_photo} WHERE member_id = ${member_id};`;
+		if (photoUpdated) {
+			await sql`UPDATE member SET access_id = ${formData.access_id}, member_name = ${formData.member_name}, member_role = ${formData.member_role}, member_photo = ${formData.member_photo} WHERE member_id = ${member_id};`;
+		} else {
+			await sql`UPDATE member SET access_id = ${formData.access_id}, member_name = ${formData.member_name}, member_role = ${formData.member_role} WHERE member_id = ${member_id};`;
+		}
 
 		req.flash("success", "Data updated successfully");
 		res.json({ message: `Member with name ${member_name} updated successfully` });

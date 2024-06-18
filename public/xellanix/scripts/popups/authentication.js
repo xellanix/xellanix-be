@@ -49,7 +49,7 @@ function onSignInSubmit(event) {
 			error: function (xhr, status, error) {
 				// Handle error
 				let errorCode = xhr.status;
-				let errorText = xhr.statusText;
+				let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 				console.log(JSON.stringify(xhr));
 				if (xhr.responseJSON && xhr.responseJSON.message) {
 					errorText = xhr.responseJSON.message;
@@ -213,7 +213,7 @@ function signOutUser() {
 			},
 			error: function (xhr, status, error) {
 				let errorCode = xhr.status;
-				let errorText = xhr.statusText;
+				let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 				let errorMessage = `Error ${errorCode}: ${errorText}`;
 
 				alert(errorMessage);

@@ -47,7 +47,7 @@ async function onProductSubmit(event) {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 			$("#new-product-error-wrapper").find("*").off();
@@ -102,7 +102,7 @@ async function onProductUpdatedSubmit(event) {
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 			$("#update-product-error-wrapper").find("*").off();
@@ -157,7 +157,7 @@ $(document).on("deleteProductPopupLoaded", function (event, element) {
 			error: function (xhr, status, error) {
 				// Handle error
 				let errorCode = xhr.status;
-				let errorText = xhr.statusText;
+				let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 				let errorMessage = `<span><strong>Error ${errorCode}</strong>: ${errorText}</span>`;
 
 				$("#delete-product-error-wrapper").find("*").off();
@@ -201,7 +201,7 @@ $("#products-container").on("click", ".product-item-edit", async function (event
 		error: function (xhr, status, error) {
 			// Handle error
 			let errorCode = xhr.status;
-			let errorText = xhr.statusText;
+			let errorText = JSON.parse(xhr.responseText)?.thrownMessage || xhr.statusText;
 			let errorMessage = `Error ${errorCode}: ${errorText}`;
 
 			alert(errorMessage);
