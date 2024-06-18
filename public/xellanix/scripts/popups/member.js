@@ -80,9 +80,16 @@ async function onMemberUpdatedSubmit(event) {
 	inputs.prop("disabled", true);
 	submitBtn.text("Updating...");
 
-	const ext = final.member_img.name.split(".").pop();
-	final.member_img = await convertImageToBase64(final.member_img);
-	final.member_img_ext = ext;
+	const hasFile = $("#member_img")[0].files?.length > 0;
+
+	if (hasFile) {
+		const ext = final.member_img.name.split(".").pop();
+		final.member_img = await convertImageToBase64(final.member_img);
+		final.member_img_ext = ext;
+	} else {
+		final.member_img = null;
+		final.member_img_ext = null;
+	}
 
 	const memberRef = submitBtn.data("memberRef");
 
@@ -108,7 +115,7 @@ async function onMemberUpdatedSubmit(event) {
 			submitBtn.text("Member Updated");
 
 			await delay(2000);
-			location.reload();
+			//location.reload();
 		},
 		error: function (xhr, status, error) {
 			// Handle error
@@ -142,7 +149,9 @@ $(document).on("deleteMemberPopupLoaded", function (event, element) {
 		const btn = $(e.currentTarget);
 		const memberRef = btn.data("memberRef");
 
-		btn.prop("disabled", true);
+		const inputs = $("#popup :input");
+		inputs.prop("disabled", true);
+
 		btn.text("Deleting...");
 
 		const accessToken = await retrieveUsableToken();
@@ -176,7 +185,7 @@ $(document).on("deleteMemberPopupLoaded", function (event, element) {
 				$("#delete-member-error-wrapper").append(infoBox("error", errorMessage));
 				$("#delete-member-error-wrapper").show();
 
-				btn.text("Delete");
+				inputs.text("Delete");
 				btn.prop("disabled", false);
 			},
 		});

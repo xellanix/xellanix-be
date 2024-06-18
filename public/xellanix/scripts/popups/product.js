@@ -131,7 +131,9 @@ $(document).on("deleteProductPopupLoaded", function (event, element) {
 		const btn = $(e.currentTarget);
 		const productRef = btn.data("productRef");
 
-		btn.prop("disabled", true);
+		const inputs = $("#popup :input");
+		inputs.prop("disabled", true);
+
 		btn.text("Deleting...");
 
 		const accessToken = await retrieveUsableToken();
@@ -166,7 +168,7 @@ $(document).on("deleteProductPopupLoaded", function (event, element) {
 				$("#delete-product-error-wrapper").show();
 
 				btn.text("Delete");
-				btn.prop("disabled", false);
+				inputs.prop("disabled", false);
 			},
 		});
 	});

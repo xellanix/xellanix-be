@@ -489,7 +489,7 @@ router.post("/member-u/(:id)", async function (req, res, next) {
 			throw new Error("Missing required fields: access_id");
 		}
 
-		const photoUpdated = !utils.isNullOrEmpty(member_photo_ext);
+		const photoUpdated = !utils.isNullOrEmpty(member_photo);
 		const isNullEntries = utils.isNullEntries({
 			member_name,
 			member_role,
