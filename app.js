@@ -15,8 +15,6 @@ var cors = require("cors");
 
 var indexRouter = require("./routes/index");
 var authRouter = require("./routes/auth");
-var productRouter = require("./routes/product");
-var memberRouter = require("./routes/member");
 var apiRouter = require("./routes/api");
 var app = express();
 
@@ -55,8 +53,6 @@ app.use(flash());
 
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
-app.use("/product", productRouter);
-app.use("/member", memberRouter);
 app.use("/api", apiRouter);
 
 app.use((req, res, next) => {
